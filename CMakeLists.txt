@@ -3,5 +3,5 @@ project(asm_and_simu C)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
-set(SOURCE_FILES notes.c helpers.c)
+set(SOURCE_FILES ssim.c)
 add_executable(asm_and_simu ${SOURCE_FILES})

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define REG0 ((IR >> 24) & 0x0F)
 #define REG1 ((IR >> 20) & 0x0F)
@@ -80,14 +81,17 @@ int main(int argc, char* argv[]) {
         printf("ERROR: cannot open file %s for reading!\n", argv[2]);
         exit(-1);
     }
-
+    /*
+     * copy instructions into memory
+     */
+    fscanf(pfIn, "%li", &instruction);
     while (!feof(pfIn)) {
-        fscanf(pfIn, "%li", &instruction);
         memcpy(PC, &instruction, sizeof(instruction));
         PC++;
+        fscanf(pfIn, "%li", &instruction);
     }
-
     fclose(pfIn);
+
     PC = (unsigned long *) MEM;
     while (ret) {
         IR = *PC;
@@ -98,12 +102,8 @@ int main(int argc, char* argv[]) {
     free(MEM);
 
     return 0;
-
 }
 
-int HTL() {
-    return 0;
-}
 
 int JMP() {
     PC = (unsigned long*)(MEM + ADDRESS);
@@ -124,7 +124,7 @@ int OJMP() {
 
 int LOAD() {
     //TODO: change to *(short*)(MEM + ADDRESS)
-    GR[REG0] = (short )(* (unsigned long)(MEM + ADDRESS));
+    GR[REG0] = (short )(* (unsigned long*)(MEM + ADDRESS));
     return 1;
 }
 
@@ -157,7 +157,7 @@ int SUB() {
 
     if (GR[REG2] >= 0) {
         PSW.overflow_flg = GR[REG0] > GR[REG1] ? 1 : 0;
-    }else if (GR[REG2 < 0]) {
+    }else if (GR[REG2] < 0) {
         PSW.overflow_flg = GR[REG0] > GR[REG1] ? 0 : 1;
     }
 
@@ -165,16 +165,38 @@ int SUB() {
 }
 
 int IN() {
-    
+    read(0, (char*)(GR + REG0), 1);
+    return 1;
 }
 
+int OUT() {
+    write(1, (char*)(GR + REG0), 1);
+    return 1;
+}
 
+int EQU() {
+    PSW.compare_flg = (GR[REG0] == GR[REG1]);
+    return 1;
+}
 
+int LT() {
+    PSW.compare_flg = (GR[REG0] < GR[REG1]);
+    return 1;
+}
 
+int LTE() {
+    PSW.compare_flg = (GR[REG0] <= GR[REG1]);
+    return 1;
+}
 
+int NOT() {
+    PSW.compare_flg = !PSW.compare_flg;
+    return 1;
+}
 
-
-
+int HLT() {
+    return 0;
+}
 
 
 

@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/melouver/Documents/asm_and_simu/ssim.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+unistd.h
+-
+
