@@ -22,11 +22,11 @@ typedef struct _PROG_STATE_WORD {
 }PROG_STATE_WORD;
 
 unsigned char* MEM;
-unsigned long* PC;
+unsigned int* PC;
 short GR[8];
 PROG_STATE_WORD PSW;
 
-unsigned long IR;
+unsigned int IR;
 
 int HLT();
 int JMP();
@@ -46,7 +46,7 @@ int LTE();
 int NOT();
 
 int main(int argc, char* argv[]) {
-    unsigned long instruction;
+    unsigned int instruction;
     unsigned long mem_size;
     int (*ops[])() =  {HLT, JMP, CJMP, OJMP, LOAD, STORE, LOADI,
                        NOP, ADD, SUB, IN, OUT, EQU, LT, LTE, NOT};
@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
-    PC = (unsigned long *) MEM;
+    PC = (unsigned int *) MEM;
     if ((pfIn = fopen(argv[2], "r")) == NULL) {
         printf("ERROR: cannot open file %s for reading!\n", argv[2]);
         exit(-1);
@@ -84,17 +84,21 @@ int main(int argc, char* argv[]) {
     /*
      * copy instructions into memory
      */
-    fscanf(pfIn, "%li", &instruction);
+    fscanf(pfIn, "%i", &instruction);
     while (!feof(pfIn)) {
         memcpy(PC, &instruction, sizeof(instruction));
         PC++;
-        fscanf(pfIn, "%li", &instruction);
+        fscanf(pfIn, "%i", &instruction);
     }
     fclose(pfIn);
 
-    PC = (unsigned long *) MEM;
+
+    PC = (unsigned int *)MEM;
+    printf("begin while loop!\n");
     while (ret) {
+        //printf("in loop\n");
         IR = *PC;
+        //printf("IR IS %x\n", IR);
         PC++;
         ret = (*ops[OPCODE])();
     }
@@ -106,25 +110,28 @@ int main(int argc, char* argv[]) {
 
 
 int JMP() {
-    PC = (unsigned long*)(MEM + ADDRESS);
+    //printf("ADDRESS IS %u", ADDRESS);
+    PC = (unsigned int*)(MEM + ADDRESS);
+    //printf("PC NOW POINTS TO %u", *PC);
+
     return 1;
 }
 
 int CJMP() {
     if (PSW.compare_flg)
-        PC = (unsigned long*)(MEM + ADDRESS);
+        PC = (unsigned int*)(MEM + ADDRESS);
     return 1;
 }
 
 int OJMP() {
     if (PSW.overflow_flg)
-        PC = (unsigned long*)(MEM + ADDRESS);
+        PC = (unsigned int*)(MEM + ADDRESS);
     return 1;
 }
 
 int LOAD() {
     //TODO: change to *(short*)(MEM + ADDRESS)
-    GR[REG0] = (short )(* (unsigned long*)(MEM + ADDRESS));
+    GR[REG0] = (short )(* (unsigned int*)(MEM + ADDRESS));
     return 1;
 }
 
@@ -165,12 +172,16 @@ int SUB() {
 }
 
 int IN() {
-    read(0, (char*)(GR + REG0), 1);
+    char ch;
+    ch = getchar();
+    GR[REG0] = (short)(ch & 0x00FF);
+    //printf("GOT %u\n", GR[REG0]);
     return 1;
 }
 
 int OUT() {
-    write(1, (char*)(GR + REG0), 1);
+    putchar((char)GR[REG0]);
+    //printf("WRITE %u\n", GR[REG0]);
     return 1;
 }
 

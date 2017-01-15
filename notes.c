@@ -4,20 +4,21 @@
 
 #include <stdio.h>
 #include <ctype.h>
-
+#include <unistd.h>
 #define MAXLINE 1000
 
 int getline(char s[], int lim);
 void copy(char to[], char from[]);
 
 int main () {
-    int len;
-    char line[MAXLINE];
-
-    while ((len = getline(line, MAXLINE)) >= 0) {
-        if (len > 0)
-            printf("%s\n", line);
-    }
+    FILE* pfIn;
+    pfIn = fopen("out", "r");
+    unsigned int instruction;
+    fscanf(pfIn, "0x%u", &instruction);
+    printf("%u", instruction);
+    fscanf(pfIn, "0x");
+    fscanf(pfIn, "%u", &instruction);
+    printf("%u", instruction);
     return 0;
 }
 

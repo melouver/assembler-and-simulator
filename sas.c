@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+
     fgets(a_line, MAX_LEN, pfIn);
     while (!feof(pfIn)) {
         if ((pcPos = strchr(a_line, '#')) != NULL) {
@@ -100,7 +101,7 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             /*
              * JMP CJMP OJMP
              */
-            n = sscanf(instr_line, "%s 0x%lu", op_sym, &addr);;
+            n = sscanf(instr_line, "%s 0x%lx", op_sym, &addr);
             if (n < 2) {
                 printf("ERROR: invalid instruction format! %s\n", instr_line);
                 exit(-1);
