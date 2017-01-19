@@ -179,9 +179,33 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
              * ADD SUB MUL DIV AND OR NOR SAL SAR
              */
             n = sscanf(instr_line, "%s %s %s %s", op_sym, reg0, reg1, reg2);
-
+            if (n < 4) {
+                printf("ERROR: invalid instruction format! %s\n", instr_line);
+                exit(-1);
+            }
+            op_code = GetInstrCode(op_sym);
+            arg1 = GetRegNum(instr_line, reg0);
+            arg2 = GetRegNum(instr_line, reg1);
+            arg3 = GetRegNum(instr_line, reg2);
+            instr_code = (op_code << 27) | (arg1 < 24) | (arg2 << 20) | (arg3 << 16);
+            break;
+        case '8':
+            /*
+             * NOTB EQU LT LTE
+             */
+            n = sscanf(instr_line, "%s %s %s", op_sym, reg0, reg1);
+            if (n < 3) {
+                printf("ERROR: invalid instruction format! %s\n", instr_line);
+                exit(-1);
+            }
+            op_code = GetInstrCode(op_sym);
+            arg1 = GetRegNum(instr_line, reg0);
+            arg2 = GetRegNum(instr_line, reg1);
+            arg3 = GetRegNum(instr_line, reg2);
+            instr_code = (op_code << 27) | (arg1 << 24) | (arg2 << 20);
+            break;
     }
-
+    return instr_code;
 }
 
 
