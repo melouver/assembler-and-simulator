@@ -1,34 +1,41 @@
 //
-// Created by melouver on 1/13/17.
+// Created by melouver on 1/16/17.
 //
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
 #define MAX_LEN 80
-#define INSTRS_COUNT (sizeof(g_instrs_name)/sizeof(g_instrs_name[0]))
-#define INSTR_SYM {"HLT", "JMP", "CJMP", "OJMP", "LOAD", "STORE",\
-                   "LOADI", "NOP", "ADD", "SUB", "IN", "OUT",\
-                   "EQU", "LT", "LTE", "NOT"\
-                  }
+#define INSTRS_COUNT (sizeof(g_instrs_name) / sizeof(g_instrs_name[0]))
+#define INSTR_SYM {"HLT", "JMP", "CJMP", "OJMP", "CALL", "RET",\
+                   "PUSH", "POP", "LOADB", "LOADW", "STOREB", "STOREW", \
+                   "LOADI", "NOP", "IN", "OUT", "ADD", "ADDI", "SUB", "SUBI",\
+                   "MUL", "DIV", "ADN", "OR", "NOR", "NOTB", "SAL", "SAR", \
+                   "EQU", "LT", "LTE", "NOTC"}
+
+#define instrs_format_macro "12222133444451667575777778778881"
 /*
  * Instructions label array
  */
+
 const char* g_instrs_name[] = INSTR_SYM;
 /*
  * Instructions format
  */
-const char instr_format[17] = "1222334155667771";
+
+const char instr_format[32] = instrs_format_macro;
 
 int GetInstrCode(const char* op_sym);
 unsigned long TransToCode(char* instr_line, int instr_num);
 int GetRegNum(char* instr_line, char* reg_name);
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     char a_line[MAX_LEN];
     char op_sym[8];
     int op_num;
-    char *pcPos;
+    char* pcPos;
     FILE *pfIn, *pfOut;
 
     int n;
@@ -41,30 +48,34 @@ int main(int argc, char* argv[]) {
         printf("ERROR: cannot open file %s for reading! \n", argv[1]);
         return 0;
     }
+
     if ((pfOut = fopen(argv[2], "w")) == NULL) {
         printf("ERROR: cannot open file %s for writing! \n", argv[2]);
         return 0;
     }
-
-
 
     fgets(a_line, MAX_LEN, pfIn);
     while (!feof(pfIn)) {
         if ((pcPos = strchr(a_line, '#')) != NULL) {
             *pcPos = '\0';
         }
+
         n = sscanf(a_line, "%s", op_sym);
-        if (n < 1)
+
+        if (n < 1) {
             continue;
+        }
 
         op_num = GetInstrCode(op_sym);
-        if (op_num > 15) {
-            printf("ERROR: %s is an invalid instruction! \n", a_line);
+        if (op_num > 31) {
+            printf("ERROR: %s is an invalid instruction!\n", a_line);
             exit(-1);
         }
+
         fprintf(pfOut, "0x%08lx\n", TransToCode(a_line, op_num));
         fgets(a_line, MAX_LEN, pfIn);
     }
+
     fclose(pfIn);
     fclose(pfOut);
 
@@ -93,14 +104,14 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
     switch (instr_format[instr_num]) {
         case '1':
             /*
-             * HLT NOP NOT
+             * HLT RET NOP NOTC
              */
             op_code = instr_num;
-            instr_code = op_code << 28;
+            instr_code = op_code << 27;
             break;
         case '2':
             /*
-             * JMP CJMP OJMP
+             * JMP CJMP OJMP CALL
              */
             n = sscanf(instr_line, "%s 0x%lx", op_sym, &addr);
             if (n < 2) {
@@ -108,51 +119,46 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
                 exit(-1);
             }
             op_code = GetInstrCode(op_sym);
-            instr_code = (op_code << 28) | (addr & 0x0ffffff);
+            instr_code = (op_code << 27) | (addr & 0x0FFFFFF);
             break;
         case '3':
             /*
-             * LOAD STORE
+             * PUSH POP
              */
-            n = sscanf(instr_line, "%s %s 0x%lx", op_sym, reg0, &addr);
-            if (n < 3){
+            n = sscanf(instr_line, "%s %s", op_sym, reg0);
+            if (n < 2) {
                 printf("ERROR: invalid instruction format! %s\n", instr_line);
-                printf("ERROR: invalid instruction format!\n");
                 exit(-1);
             }
             op_code = GetInstrCode(op_sym);
             arg1 = GetRegNum(instr_line, reg0);
-            instr_code = (op_code << 28) | (arg1 << 24) | (addr & 0x0ffffff);
+            instr_code = (op_code << 27) | (arg1 << 24);
             break;
         case '4':
             /*
-             * LOADI
+             * LOADB LOADW STOREB STOREW
+             */
+            n = sscanf(instr_line, "%s %s 0x%lx", op_sym, reg0, &addr);
+            if (n < 3) {
+                printf("ERROR: invalid instruction format! %s\n", instr_line);
+                exit(-1);
+            }
+            op_code = GetInstrCode(op_sym);
+            arg1 = GetRegNum(instr_line, reg0);
+            instr_code = (op_code << 27) | (arg1 << 24) | (addr & 0x0ffffff);
+            break;
+        case '5':
+            /*
+             * LOADI ADDI SUBI
              */
             n = sscanf(instr_line, "%s %s %i", op_sym, reg0, &immediate);
             if (n < 3) {
                 printf("ERROR: invalid instruction format! %s\n", instr_line);
-                printf("ERROR: invalid instruction format!\n");
                 exit(-1);
             }
             op_code = GetInstrCode(op_sym);
             arg1 = GetRegNum(instr_line, reg0);
-            instr_code = (op_code << 28) | (arg1 << 24) | (immediate & 0x0000ffff);
-            break;
-        case '5':
-            /*
-             * ADD SUB
-             */
-            n = sscanf(instr_line, "%s %s %s %s", op_sym, reg0, reg1, reg2);
-            if (n < 4) {
-                printf("ERROR: invalid instruction format! %s\n", instr_line);
-                printf("ERROR: invalid instruction format!\n");
-                exit(-1);
-            }
-            op_code = GetInstrCode(op_sym);
-            arg1 = GetRegNum(instr_line, reg0);
-            arg2 = GetRegNum(instr_line, reg1);
-            arg3 = GetRegNum(instr_line, reg2);
-            instr_code = (op_code << 28) | (arg1 << 24) | (arg2 << 20) | (arg3 << 16);
+            instr_code = (op_code << 27) | (arg1 << 24) | (immediate & 0x0FFF);
             break;
         case '6':
             /*
@@ -166,42 +172,20 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             }
             op_code = GetInstrCode(op_sym);
             arg1 = GetRegNum(instr_line, reg0);
-            instr_code = (op_code << 28) | (arg1 << 24) | (port & 0x000000ff);
+            instr_code = (op_code << 27) | (arg1 << 24) | (port & 0x0ff);
             break;
         case '7':
             /*
-             * EQU LT LTE
+             * ADD SUB MUL DIV AND OR NOR SAL SAR
              */
-            n = sscanf(instr_line, "%s %s %s", op_sym, reg0, reg1);
-            if (n < 3) {
-                printf("ERROR: invalid instruction format! %s\n", instr_line);
-                printf("ERROR: invalid instruction format!\n");
-                exit(-1);
-            }
-            op_code = GetInstrCode(op_sym);
-            arg1 = GetRegNum(instr_line, reg0);
-            arg2 = GetRegNum(instr_line, reg1);
+            n = sscanf(instr_line, "%s %s %s %s", op_sym, reg0, reg1, reg2);
 
-            instr_code = (op_code << 28)|(arg1 << 24) | (arg2 << 20);
-            break;
     }
-    return instr_code;
+
 }
 
-int GetRegNum(char* instr_line, char* reg_name) {
-    int reg_num;
-    if (tolower(*reg_name) == 'z')
-        reg_num = 0;
-    else if (tolower(*reg_name) >= 'a' && tolower(*reg_name) <= 'g') {
-        reg_num = tolower(*reg_name) - 'a' + 1;
-    }
-    else {
-        printf("ERROR: invalid register name in %s!", instr_line);
-        exit(-1);
-    }
 
-    return reg_num;
-}
+
 
 
 
