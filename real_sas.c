@@ -209,6 +209,22 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
 }
 
 
+int GetRegNum(char* instr_line, char* reg_name) {
+    int reg_num;
+    if (tolower(*reg_name) == 'z')
+        reg_num = 0;
+    else if (tolower(*reg_name) >= 'a' && tolower(*reg_name) <= 'g') {
+        reg_num = tolower(*reg_name) - 'a' + 1;
+    }
+    else {
+        printf("ERROR: invalid register name in %s!", instr_line);
+        exit(-1);
+    }
+
+    return reg_num;
+}
+
+
 
 
 
