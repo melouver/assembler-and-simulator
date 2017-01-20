@@ -201,9 +201,12 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             op_code = GetInstrCode(op_sym);
             arg1 = GetRegNum(instr_line, reg0);
             arg2 = GetRegNum(instr_line, reg1);
-            arg3 = GetRegNum(instr_line, reg2);
             instr_code = (op_code << 27) | (arg1 << 24) | (arg2 << 20);
             break;
+        case '9':
+            /*
+             * B
+             */
     }
     return instr_code;
 }
@@ -217,7 +220,7 @@ int GetRegNum(char* instr_line, char* reg_name) {
         reg_num = tolower(*reg_name) - 'a' + 1;
     }
     else {
-        printf("ERROR: invalid register name in %s!", instr_line);
+        printf("ERROR: invalid register name in %s! register name is %s", instr_line, reg_name);
         exit(-1);
     }
 
