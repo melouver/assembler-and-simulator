@@ -13,7 +13,7 @@
                    "PUSH", "POP", "LOADB", "LOADW", "STOREB", "STOREW", \
                    "LOADI", "NOP", "IN", "OUT", "ADD", "ADDI", "SUB", "SUBI",\
                    "MUL", "DIV", "ADN", "OR", "NOR", "NOTB", "SAL", "SAR", \
-                   "EQU", "LT", "LTE", "NOTC"}
+                   "EQU", "LT", "LTE", "NOTC", "BYTE", "WORD"}
 
 #define instrs_format_macro "12222133444451667575777778778881"
 /*
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     char a_line[MAX_LEN];
     char op_sym[8];
     int op_num;
-    char* pcPos;
+    char *pcPos;
     FILE *pfIn, *pfOut;
 
     int n;
@@ -62,6 +62,10 @@ int main(int argc, char *argv[]) {
 
         n = sscanf(a_line, "%s", op_sym);
 
+        if (strcmp(op_sym, "BYTE") == 0 || strcmp(op_sym, "WORD") == 0) {
+            continue;
+        }
+
         if (n < 1) {
             continue;
         }
@@ -75,10 +79,53 @@ int main(int argc, char *argv[]) {
         fprintf(pfOut, "0x%08lx\n", TransToCode(a_line, op_num));
         fgets(a_line, MAX_LEN, pfIn);
     }
+    rewind(pfIn);
+
+    int index = 0, offset = 0, unit = 1, count = 0;
+    char *left_braket_pointer, *left_brace_pointer, *right_brace_pointer;
+    fgets(a_line, MAX_LEN, pfIn);
+    while (!feof(pfIn)){
+        if ((pcPos = strchr(a_line, '#')) != NULL)
+            *pcPos = '\0';
+
+        n = sscanf(a_line, "%s", op_sym);
+        if (strcmp(op_sym, "BYTE") == 0) {
+            unit = 1;
+        }else if (strcmp(op_sym, "WORD") == 0) {
+            unit = 2;
+        }else
+            break;
+
+        switch (unit) {
+            case 1:
+            {
+                if ((left_braket_pointer = strchr(a_line, '[')) != NULL) {
+                    count = left_braket_pointer[1];
+                    int written_count = 0;
+                    if ((left_brace_pointer = strchr(a_line, '{')) != NULL) {
+                        if ((right_brace_pointer = strchr(a_line, '}')) != NULL) {
+                            *right_brace_pointer = '\0';
+                            char* token = strtok(left_brace_pointer+1, ",");
+                            while (token) {
+                                if (index == )
+                            }
+                        }
+
+                    }
+                }
+            }
+
+
+                break;
+
+        }
+    }
+
+
+
 
     fclose(pfIn);
     fclose(pfOut);
-
 
     return 0;
 }
@@ -205,8 +252,11 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             break;
         case '9':
             /*
-             * B
+             * BYTE WORD
              */
+
+
+
     }
     return instr_code;
 }

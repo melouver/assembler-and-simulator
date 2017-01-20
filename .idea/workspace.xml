@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/real_sas.c" line="37" mnemonic="1" />
+  </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" assignedExecutableTargets="true" buildAllGenerated="true">
     <generated>
       <config projectName="asm_and_simu" targetName="asm_and_simu" />
@@ -14,8 +17,6 @@
     <list default="true" id="693642ed-3874-4285-94a3-2eecd61811d5" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/rsas" afterPath="$PROJECT_DIR$/rsas" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/in" afterPath="$PROJECT_DIR$/in" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out" afterPath="$PROJECT_DIR$/out" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/real_sas.c" afterPath="$PROJECT_DIR$/real_sas.c" />
     </list>
     <ignored path="asm_and_simu.iws" />
@@ -133,8 +134,8 @@
       <file leaf-file-name="real_sas.c" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/real_sas.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="369">
-              <caret line="207" column="16" selection-start-line="207" selection-start-column="16" selection-end-line="207" selection-end-column="16" />
+            <state relative-caret-position="660">
+              <caret line="109" column="45" selection-start-line="109" selection-start-column="45" selection-end-line="109" selection-end-column="45" />
               <folding>
                 <element signature="e#42#60#0" expanded="true" />
               </folding>
@@ -170,9 +171,9 @@
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="916" />
+    <option name="x" value="415" />
     <option name="y" value="27" />
-    <option name="width" value="981" />
+    <option name="width" value="1482" />
     <option name="height" value="912" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -425,15 +426,15 @@
       <workItem from="1484539696979" duration="5331000" />
       <workItem from="1484576776261" duration="1194000" />
       <workItem from="1484816939665" duration="13390000" />
-      <workItem from="1484885976109" duration="4227000" />
+      <workItem from="1484885976109" duration="10122000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="66116000" />
+    <option name="totallyTimeSpent" value="72011000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="916" y="27" width="981" height="912" extended-state="0" />
+    <frame x="415" y="27" width="1482" height="912" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.0993538" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
@@ -920,8 +921,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/real_sas.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="369">
-          <caret line="207" column="16" selection-start-line="207" selection-start-column="16" selection-end-line="207" selection-end-column="16" />
+        <state relative-caret-position="660">
+          <caret line="109" column="45" selection-start-line="109" selection-start-column="45" selection-end-line="109" selection-end-column="45" />
           <folding>
             <element signature="e#42#60#0" expanded="true" />
           </folding>
