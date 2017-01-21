@@ -1,3 +1,4 @@
+BYTE cell[2] = {1}
 LOADI A 64
 LOADI G 0
 ADDI G 1

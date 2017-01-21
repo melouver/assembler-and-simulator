@@ -13,7 +13,7 @@
                    "PUSH", "POP", "LOADB", "LOADW", "STOREB", "STOREW", \
                    "LOADI", "NOP", "IN", "OUT", "ADD", "ADDI", "SUB", "SUBI",\
                    "MUL", "DIV", "ADN", "OR", "NOR", "NOTB", "SAL", "SAR", \
-                   "EQU", "LT", "LTE", "NOTC", "BYTE", "WORD"}
+                   "EQU", "LT", "LTE", "NOTC"}
 
 #define instrs_format_macro "12222133444451667575777778778881"
 /*
@@ -59,10 +59,10 @@ int main(int argc, char *argv[]) {
         if ((pcPos = strchr(a_line, '#')) != NULL) {
             *pcPos = '\0';
         }
-
         n = sscanf(a_line, "%s", op_sym);
 
         if (strcmp(op_sym, "BYTE") == 0 || strcmp(op_sym, "WORD") == 0) {
+            fgets(a_line, MAX_LEN, pfIn);
             continue;
         }
 
@@ -81,6 +81,7 @@ int main(int argc, char *argv[]) {
     }
     rewind(pfIn);
 
+
     int index = 0, offset = 0, unit = 1, count = 0, number;
     char *left_braket_pointer, *left_brace_pointer, *right_brace_pointer;
 
@@ -96,19 +97,18 @@ int main(int argc, char *argv[]) {
             unit = 2;
         }else
             break;
-
         switch (unit) {
             case 1:
             {
                 if ((left_braket_pointer = strchr(a_line, '[')) != NULL) {
-                    count = left_braket_pointer[1];
+                    count = left_braket_pointer[1] - '0';
                     int written_count = 0;
                     if ((left_brace_pointer = strchr(a_line, '{')) != NULL) {
                         if ((right_brace_pointer = strchr(a_line, '}')) != NULL) {
                             //  {  } exists
-                            // e.g. BYTE cell[4] = {1, 2, 3, 4}
+                            // e.g. BYTE cell[4] = {1, 2, 3, 4} PASSED
                             *right_brace_pointer = '\0';
-                            char* token = strtok(left_brace_pointer+1, ",");
+                            char *token = strtok(left_brace_pointer + 1, ",");
                             while (token) {
                                 n = sscanf(token, "%i", &number);
                                 if (n < 1) {
@@ -117,31 +117,33 @@ int main(int argc, char *argv[]) {
                                 if (index == 0) {
                                     fprintf(pfOut, "0x");
                                 }
-                                fprintf(pfOut, "%02lx", number);
+                                fprintf(pfOut, "%02x", number);
                                 if (index == 3) {
                                     fprintf(pfOut, "\n");
                                 }
                                 index = (index + 1) % 4;
                                 written_count++;
+                                token = strtok(NULL, ",");
                             }
-                        }
-                        // init list shorter than expected
-                        // e.g. BTYE cell[4] = {1}
-                        if (written_count < count) {
-                            for (int i = 0; i < count - written_count; ++i) {
-                                if (index == 0) {
-                                    fprintf(pfOut, "0x");
+                            // init list shorter than expected
+                            // e.g. BTYE cell[4] = {1} PASSED
+                            if (written_count < count) {
+                                for (int i = 0; i < count - written_count; ++i) {
+                                    if (index == 0) {
+                                        fprintf(pfOut, "0x");
+                                    }
+                                    fprintf(pfOut, "%02lx", 0ul);
+                                    if (index == 3) {
+                                        fprintf(pfOut, "\n");
+                                    }
+                                    index = (index + 1) % 4;
+                                    printf("one time\n");
                                 }
-                                fprintf(pfOut, "%02lx", 0ul);
-                                if (index == 3) {
-                                    fprintf(pfOut, "\n");
-                                }
-                                index = (index + 1) % 4;
                             }
                         }
                     } else {
                         // no { } exists, but [] exists, init with 0
-                        // e.g. WORD cell[10]
+                        // e.g. BYTE cell[10]
                         for (int i = 0; i < count; ++i) {
                             if (index == 0) {
                                 fprintf(pfOut, "0x");
@@ -150,6 +152,7 @@ int main(int argc, char *argv[]) {
                             if (index == 3) {
                                 fprintf(pfOut, "\n");
                             }
+                            printf("one time\n");
                             index = (index + 1) % 4;
                         }
                     }
@@ -157,7 +160,8 @@ int main(int argc, char *argv[]) {
                     // no [ ] , only one variable
                     char *equ_pointer;
                     if ((equ_pointer = strchr(a_line, '=')) != NULL) {
-                        // BYTE cell = 3
+                        // e.g. BYTE cell = 3 PASSED
+
                         n = sscanf(equ_pointer+1, "%i", &number);
                         if (n < 1) {
                             printf("ERROR: no initialize value\n");
@@ -165,12 +169,14 @@ int main(int argc, char *argv[]) {
                         if (index == 0) {
                             fprintf(pfOut, "0x");
                         }
-                        fprintf(pfOut, "%02lx", number);
+                        fprintf(pfOut, "%02x", number);
                         if (index == 3) {
                             fprintf(pfOut, "\n");
                         }
+                        printf("one time\n");
 
                     } else {
+                        // e.g. BYTE cell PASSED
                         if (index == 0) {
                             fprintf(pfOut, "0x");
                         }
@@ -178,15 +184,15 @@ int main(int argc, char *argv[]) {
                         if (index == 3) {
                             fprintf(pfOut, "\n");
                         }
+                        printf("one time\n");
                     }
                     index = (index + 1) % 4;
                 }
             }
-
-
                 break;
 
         }
+        fgets(a_line, MAX_LEN, pfIn);
     }
 
 
@@ -318,10 +324,7 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             arg2 = GetRegNum(instr_line, reg1);
             instr_code = (op_code << 27) | (arg1 << 24) | (arg2 << 20);
             break;
-        case '9':
-            /*
-             * BYTE WORD
-             */
+
 
 
 
