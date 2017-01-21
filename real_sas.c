@@ -81,8 +81,9 @@ int main(int argc, char *argv[]) {
     }
     rewind(pfIn);
 
-    int index = 0, offset = 0, unit = 1, count = 0;
+    int index = 0, offset = 0, unit = 1, count = 0, number;
     char *left_braket_pointer, *left_brace_pointer, *right_brace_pointer;
+
     fgets(a_line, MAX_LEN, pfIn);
     while (!feof(pfIn)){
         if ((pcPos = strchr(a_line, '#')) != NULL)
@@ -104,14 +105,81 @@ int main(int argc, char *argv[]) {
                     int written_count = 0;
                     if ((left_brace_pointer = strchr(a_line, '{')) != NULL) {
                         if ((right_brace_pointer = strchr(a_line, '}')) != NULL) {
+                            //  {  } exists
+                            // e.g. BYTE cell[4] = {1, 2, 3, 4}
                             *right_brace_pointer = '\0';
                             char* token = strtok(left_brace_pointer+1, ",");
                             while (token) {
-                                if (index == )
+                                n = sscanf(token, "%i", &number);
+                                if (n < 1) {
+                                    printf("ERROR: INVALID INITIALIZER LIST\n");
+                                }
+                                if (index == 0) {
+                                    fprintf(pfOut, "0x");
+                                }
+                                fprintf(pfOut, "%02lx", number);
+                                if (index == 3) {
+                                    fprintf(pfOut, "\n");
+                                }
+                                index = (index + 1) % 4;
+                                written_count++;
                             }
                         }
-
+                        // init list shorter than expected
+                        // e.g. BTYE cell[4] = {1}
+                        if (written_count < count) {
+                            for (int i = 0; i < count - written_count; ++i) {
+                                if (index == 0) {
+                                    fprintf(pfOut, "0x");
+                                }
+                                fprintf(pfOut, "%02lx", 0ul);
+                                if (index == 3) {
+                                    fprintf(pfOut, "\n");
+                                }
+                                index = (index + 1) % 4;
+                            }
+                        }
+                    } else {
+                        // no { } exists, but [] exists, init with 0
+                        // e.g. WORD cell[10]
+                        for (int i = 0; i < count; ++i) {
+                            if (index == 0) {
+                                fprintf(pfOut, "0x");
+                            }
+                            fprintf(pfOut, "%02lx", 0ul);
+                            if (index == 3) {
+                                fprintf(pfOut, "\n");
+                            }
+                            index = (index + 1) % 4;
+                        }
                     }
+                }else {
+                    // no [ ] , only one variable
+                    char *equ_pointer;
+                    if ((equ_pointer = strchr(a_line, '=')) != NULL) {
+                        // BYTE cell = 3
+                        n = sscanf(equ_pointer+1, "%i", &number);
+                        if (n < 1) {
+                            printf("ERROR: no initialize value\n");
+                        }
+                        if (index == 0) {
+                            fprintf(pfOut, "0x");
+                        }
+                        fprintf(pfOut, "%02lx", number);
+                        if (index == 3) {
+                            fprintf(pfOut, "\n");
+                        }
+
+                    } else {
+                        if (index == 0) {
+                            fprintf(pfOut, "0x");
+                        }
+                        fprintf(pfOut, "00");
+                        if (index == 3) {
+                            fprintf(pfOut, "\n");
+                        }
+                    }
+                    index = (index + 1) % 4;
                 }
             }
 
