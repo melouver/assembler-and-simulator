@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/sas.c" />
+  </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" assignedExecutableTargets="true" buildAllGenerated="true">
     <generated>
       <config projectName="asm_and_simu" targetName="asm_and_simu" />
@@ -13,6 +16,7 @@
   <component name="ChangeListManager">
     <list default="true" id="693642ed-3874-4285-94a3-2eecd61811d5" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/rsas" afterPath="$PROJECT_DIR$/rsas" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/in" afterPath="$PROJECT_DIR$/in" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out" afterPath="$PROJECT_DIR$/out" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/real_sas.c" afterPath="$PROJECT_DIR$/real_sas.c" />
@@ -60,7 +64,7 @@
       <file leaf-file-name="CMakeLists.txt" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
+            <state relative-caret-position="32">
               <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
               <folding />
             </state>
@@ -70,7 +74,7 @@
       <file leaf-file-name="main.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
+            <state relative-caret-position="80">
               <caret line="5" column="1" selection-start-line="5" selection-start-column="1" selection-end-line="5" selection-end-column="1" />
               <folding />
             </state>
@@ -90,7 +94,7 @@
       <file leaf-file-name="helpers.c" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/helpers.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
+            <state relative-caret-position="64">
               <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
               <folding />
             </state>
@@ -100,7 +104,7 @@
       <file leaf-file-name="notes.c" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/notes.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
+            <state relative-caret-position="288">
               <caret line="18" column="20" selection-start-line="18" selection-start-column="20" selection-end-line="18" selection-end-column="20" />
               <folding>
                 <element signature="e#42#60#0" expanded="true" />
@@ -112,7 +116,7 @@
       <file leaf-file-name="ssim.c" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ssim.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
+            <state relative-caret-position="2192">
               <caret line="137" column="13" selection-start-line="137" selection-start-column="13" selection-end-line="137" selection-end-column="13" />
               <folding />
             </state>
@@ -122,7 +126,7 @@
       <file leaf-file-name="in" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/in">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
+            <state relative-caret-position="112">
               <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
               <folding />
             </state>
@@ -132,8 +136,8 @@
       <file leaf-file-name="real_sas.c" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/real_sas.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="656">
-              <caret line="128" column="61" selection-start-line="128" selection-start-column="61" selection-end-line="128" selection-end-column="61" />
+            <state relative-caret-position="32">
+              <caret line="144" column="29" selection-start-line="144" selection-start-column="29" selection-end-line="144" selection-end-column="29" />
               <folding>
                 <element signature="e#42#60#0" expanded="true" />
               </folding>
@@ -421,12 +425,14 @@
       <workItem from="1484576776261" duration="1194000" />
       <workItem from="1484816939665" duration="13390000" />
       <workItem from="1484885976109" duration="10160000" />
-      <workItem from="1484972014728" duration="10583000" />
+      <workItem from="1484972014728" duration="11220000" />
+      <workItem from="1485050638960" duration="407000" />
+      <workItem from="1485053780087" duration="690000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="82632000" />
+    <option name="totallyTimeSpent" value="84366000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="680" y="27" width="1154" height="1020" extended-state="0" />
@@ -848,7 +854,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="80">
           <caret line="5" column="1" selection-start-line="5" selection-start-column="1" selection-end-line="5" selection-end-column="1" />
           <folding />
         </state>
@@ -856,7 +862,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/helpers.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="64">
           <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
           <folding />
         </state>
@@ -864,7 +870,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/in">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="112">
           <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
           <folding />
         </state>
@@ -872,7 +878,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/notes.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="288">
           <caret line="18" column="20" selection-start-line="18" selection-start-column="20" selection-end-line="18" selection-end-column="20" />
           <folding>
             <element signature="e#42#60#0" expanded="true" />
@@ -882,7 +888,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="32">
           <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
           <folding />
         </state>
@@ -898,7 +904,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ssim.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="2192">
           <caret line="137" column="13" selection-start-line="137" selection-start-column="13" selection-end-line="137" selection-end-column="13" />
           <folding />
         </state>
@@ -916,8 +922,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/real_sas.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="656">
-          <caret line="128" column="61" selection-start-line="128" selection-start-column="61" selection-end-line="128" selection-end-column="61" />
+        <state relative-caret-position="32">
+          <caret line="144" column="29" selection-start-line="144" selection-start-column="29" selection-end-line="144" selection-end-column="29" />
           <folding>
             <element signature="e#42#60#0" expanded="true" />
           </folding>

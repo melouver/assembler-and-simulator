@@ -101,7 +101,10 @@ int main(int argc, char *argv[]) {
             case 1:
             {
                 if ((left_braket_pointer = strchr(a_line, '[')) != NULL) {
-                    count = left_braket_pointer[1] - '0';
+                    n = sscanf(left_braket_pointer+1, "%d]", &count);
+                    if (n < 1) {
+                        printf("ERROR: invalid array capicity!\n");
+                    }
                     int written_count = 0;
                     if ((left_brace_pointer = strchr(a_line, '{')) != NULL) {
                         if ((right_brace_pointer = strchr(a_line, '}')) != NULL) {
@@ -143,7 +146,7 @@ int main(int argc, char *argv[]) {
                         }
                     } else {
                         // no { } exists, but [] exists, init with 0
-                        // e.g. BYTE cell[10]
+                        // e.g. BYTE cell[10] PASSED
                         for (int i = 0; i < count; ++i) {
                             if (index == 0) {
                                 fprintf(pfOut, "0x");
