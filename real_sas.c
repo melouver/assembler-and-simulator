@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "customized_print_functions.h"
 
 #define MAX_LEN 80
 #define INSTRS_COUNT (sizeof(g_instrs_name) / sizeof(g_instrs_name[0]))
@@ -117,6 +118,7 @@ int main(int argc, char *argv[]) {
                                 if (n < 1) {
                                     printf("ERROR: INVALID INITIALIZER LIST\n");
                                 }
+                                /*
                                 if (index == 0) {
                                     fprintf(pfOut, "0x");
                                 }
@@ -124,7 +126,8 @@ int main(int argc, char *argv[]) {
                                 if (index == 3) {
                                     fprintf(pfOut, "\n");
                                 }
-                                index = (index + 1) % 4;
+                                index = (index + 1) % 4;*/
+                                byte_print(&index, "%02x", &number, pfOut);
                                 written_count++;
                                 token = strtok(NULL, ",");
                             }
@@ -132,7 +135,7 @@ int main(int argc, char *argv[]) {
                             // e.g. BTYE cell[4] = {1} PASSED
                             if (written_count < count) {
                                 for (int i = 0; i < count - written_count; ++i) {
-                                    if (index == 0) {
+                                    /*if (index == 0) {
                                         fprintf(pfOut, "0x");
                                     }
                                     fprintf(pfOut, "%02lx", 0ul);
@@ -140,7 +143,9 @@ int main(int argc, char *argv[]) {
                                         fprintf(pfOut, "\n");
                                     }
                                     index = (index + 1) % 4;
-                                    printf("one time\n");
+                                    */
+                                    number = 0;
+                                    byte_print(&index, "%02lx", &number, pfOut);
                                 }
                             }
                         }
@@ -148,15 +153,19 @@ int main(int argc, char *argv[]) {
                         // no { } exists, but [] exists, init with 0
                         // e.g. BYTE cell[10] PASSED
                         for (int i = 0; i < count; ++i) {
-                            if (index == 0) {
+                            /*if (index == 0) {
                                 fprintf(pfOut, "0x");
                             }
                             fprintf(pfOut, "%02lx", 0ul);
                             if (index == 3) {
                                 fprintf(pfOut, "\n");
                             }
-                            printf("one time\n");
                             index = (index + 1) % 4;
+                            */
+                            number = 0;
+                            byte_print(&index, "%02lx", &number, pfOut);
+                            printf("one time\n");
+
                         }
                     }
                 }else {
@@ -169,27 +178,29 @@ int main(int argc, char *argv[]) {
                         if (n < 1) {
                             printf("ERROR: no initialize value\n");
                         }
-                        if (index == 0) {
+                        /*if (index == 0) {
                             fprintf(pfOut, "0x");
                         }
                         fprintf(pfOut, "%02x", number);
                         if (index == 3) {
                             fprintf(pfOut, "\n");
-                        }
+                        }*/
+                        byte_print(&index, "%02x", &number, pfOut);
                         printf("one time\n");
 
                     } else {
                         // e.g. BYTE cell PASSED
-                        if (index == 0) {
+                        /*if (index == 0) {
                             fprintf(pfOut, "0x");
                         }
                         fprintf(pfOut, "00");
                         if (index == 3) {
                             fprintf(pfOut, "\n");
-                        }
+                        }*/
+                        byte_print(&index, "00", NULL, pfOut);
                         printf("one time\n");
                     }
-                    index = (index + 1) % 4;
+
                 }
             }
                 break;

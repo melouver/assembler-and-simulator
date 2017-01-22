@@ -1,4 +1,4 @@
-BYTE cell = 5
+BYTE cell
 LOADI A 64
 LOADI G 0
 ADDI G 1

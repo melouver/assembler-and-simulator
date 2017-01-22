@@ -2,10 +2,12 @@
 <module type="CPP_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/real_ssim.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/real_sas.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/ssim.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/customized_print_functions.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/real_ssim.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/customized_print_functions.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ssim.c" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
