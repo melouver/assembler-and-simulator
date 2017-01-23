@@ -100,6 +100,7 @@ int main(int argc, char *argv[]) {
             break;
         switch (unit) {
             case 1:
+            case 2:
             {
                 if ((left_braket_pointer = strchr(a_line, '[')) != NULL) {
                     n = sscanf(left_braket_pointer+1, "%d]", &count);
@@ -118,7 +119,14 @@ int main(int argc, char *argv[]) {
                                 if (n < 1) {
                                     printf("ERROR: INVALID INITIALIZER LIST\n");
                                 }
-                                byte_print(&index, "%02x", &number, pfOut);
+                                if (unit == 1) {
+                                    byte_print(&index, "%02x", &number, pfOut);
+                                }else {
+                                    int tmp = number & 0x0F;
+                                    byte_print(&index, "%02x", &tmp, pfOut);
+                                    tmp = number & 0x0F0;
+                                    byte_print(&index, "%02x", &tmp, pfOut);
+                                }
                                 written_count++;
                                 token = strtok(NULL, ",");
                             }
@@ -126,8 +134,12 @@ int main(int argc, char *argv[]) {
                             // e.g. BTYE cell[4] = {1} PASSED
                             if (written_count < count) {
                                 for (int i = 0; i < count - written_count; ++i) {
-                                    number = 0;
-                                    byte_print(&index, "%02lx", &number, pfOut);
+                                    if (unit == 1) {
+                                        byte_print(&index, "00", NULL, pfOut);
+                                    }else {
+                                        byte_print(&index, "00", NULL, pfOut);
+                                        byte_print(&index, "00", NULL, pfOut);
+                                    }
                                 }
                             }
                         }
@@ -135,8 +147,12 @@ int main(int argc, char *argv[]) {
                         // no { } exists, but [] exists, init with 0
                         // e.g. BYTE cell[10] PASSED
                         for (int i = 0; i < count; ++i) {
-                            number = 0;
-                            byte_print(&index, "%02lx", &number, pfOut);
+                            if (unit == 1) {
+                                byte_print(&index, "00", NULL, pfOut);
+                            }else {
+                                byte_print(&index, "00", NULL, pfOut);
+                                byte_print(&index, "00", NULL, pfOut);
+                            }
                         }
                     }
                 }else {
@@ -148,10 +164,22 @@ int main(int argc, char *argv[]) {
                         if (n < 1) {
                             printf("ERROR: no initialize value\n");
                         }
-                        byte_print(&index, "%02x", &number, pfOut);
+                        if (unit == 1) {
+                            byte_print(&index, "%02x", &number, pfOut);
+                        }else {
+                            int tmp = number & 0x0F;
+                            byte_print(&index, "%02x", &tmp, pfOut);
+                            tmp = number & 0x0F0;
+                            byte_print(&index, "%02x", &tmp, pfOut);
+                        }
                     } else {
                         // e.g. BYTE cell PASSED
-                        byte_print(&index, "00", NULL, pfOut);
+                        if (unit == 1) {
+                            byte_print(&index, "00", NULL, pfOut);
+                        }else {
+                            byte_print(&index, "00", NULL, pfOut);
+                            byte_print(&index, "00", NULL, pfOut);
+                        }
                     }
 
                 }
