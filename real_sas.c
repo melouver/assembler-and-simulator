@@ -7,7 +7,6 @@
 #include <string.h>
 #include <ctype.h>
 #include "customized_print_functions.h"
-
 #define MAX_LEN 80
 #define INSTRS_COUNT (sizeof(g_instrs_name) / sizeof(g_instrs_name[0]))
 #define INSTR_SYM {"HLT", "JMP", "CJMP", "OJMP", "CALL", "RET",\
@@ -87,104 +86,102 @@ int main(int argc, char *argv[]) {
     char *left_braket_pointer, *left_brace_pointer, *right_brace_pointer;
 
     fgets(a_line, MAX_LEN, pfIn);
-    while (!feof(pfIn)){
+    while (!feof(pfIn)) {
         if ((pcPos = strchr(a_line, '#')) != NULL)
             *pcPos = '\0';
 
         n = sscanf(a_line, "%s", op_sym);
+        if (n < 1) {
+            printf("ERROR: invalid instruction code!\n");
+            exit(-1);
+        }
         if (strcmp(op_sym, "BYTE") == 0) {
             unit = 1;
-        }else if (strcmp(op_sym, "WORD") == 0) {
+        } else if (strcmp(op_sym, "WORD") == 0) {
             unit = 2;
-        }else
+        } else
             break;
-        switch (unit) {
-            case 1:
-            case 2:
-            {
-                if ((left_braket_pointer = strchr(a_line, '[')) != NULL) {
-                    n = sscanf(left_braket_pointer+1, "%d]", &count);
-                    if (n < 1) {
-                        printf("ERROR: invalid array capicity!\n");
-                    }
-                    int written_count = 0;
-                    if ((left_brace_pointer = strchr(a_line, '{')) != NULL) {
-                        if ((right_brace_pointer = strchr(a_line, '}')) != NULL) {
-                            //  {  } exists
-                            // e.g. BYTE cell[4] = {1, 2, 3, 4} PASSED
-                            *right_brace_pointer = '\0';
-                            char *token = strtok(left_brace_pointer + 1, ",");
-                            while (token) {
-                                n = sscanf(token, "%i", &number);
-                                if (n < 1) {
-                                    printf("ERROR: INVALID INITIALIZER LIST\n");
-                                }
-                                if (unit == 1) {
-                                    byte_print(&index, "%02x", &number, pfOut);
-                                }else {
-                                    int tmp = number & 0x0F;
-                                    byte_print(&index, "%02x", &tmp, pfOut);
-                                    tmp = number & 0x0F0;
-                                    byte_print(&index, "%02x", &tmp, pfOut);
-                                }
-                                written_count++;
-                                token = strtok(NULL, ",");
-                            }
-                            // init list shorter than expected
-                            // e.g. BTYE cell[4] = {1} PASSED
-                            if (written_count < count) {
-                                for (int i = 0; i < count - written_count; ++i) {
-                                    if (unit == 1) {
-                                        byte_print(&index, "00", NULL, pfOut);
-                                    }else {
-                                        byte_print(&index, "00", NULL, pfOut);
-                                        byte_print(&index, "00", NULL, pfOut);
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        // no { } exists, but [] exists, init with 0
-                        // e.g. BYTE cell[10] PASSED
-                        for (int i = 0; i < count; ++i) {
-                            if (unit == 1) {
-                                byte_print(&index, "00", NULL, pfOut);
-                            }else {
-                                byte_print(&index, "00", NULL, pfOut);
-                                byte_print(&index, "00", NULL, pfOut);
-                            }
-                        }
-                    }
-                }else {
-                    // no [ ] , only one variable
-                    char *equ_pointer;
-                    if ((equ_pointer = strchr(a_line, '=')) != NULL) {
-                        // e.g. BYTE cell = 3 PASSED
-                        n = sscanf(equ_pointer+1, "%i", &number);
+
+        if ((left_braket_pointer = strchr(a_line, '[')) != NULL) {
+            n = sscanf(left_braket_pointer + 1, "%d]", &count);
+            if (n < 1) {
+                printf("ERROR: invalid array capicity!\n");
+            }
+            int written_count = 0;
+            if ((left_brace_pointer = strchr(a_line, '{')) != NULL) {
+                if ((right_brace_pointer = strchr(a_line, '}')) != NULL) {
+                    //  {  } exists
+                    // e.g. BYTE cell[4] = {1, 2, 3, 4} PASSED
+                    *right_brace_pointer = '\0';
+                    char *token = strtok(left_brace_pointer + 1, ",");
+                    while (token) {
+                        n = sscanf(token, "%i", &number);
                         if (n < 1) {
-                            printf("ERROR: no initialize value\n");
+                            printf("ERROR: INVALID INITIALIZER LIST\n");
                         }
                         if (unit == 1) {
                             byte_print(&index, "%02x", &number, pfOut);
-                        }else {
+                        } else {
                             int tmp = number & 0x0F;
                             byte_print(&index, "%02x", &tmp, pfOut);
                             tmp = number & 0x0F0;
                             byte_print(&index, "%02x", &tmp, pfOut);
                         }
-                    } else {
-                        // e.g. BYTE cell PASSED
-                        if (unit == 1) {
-                            byte_print(&index, "00", NULL, pfOut);
-                        }else {
-                            byte_print(&index, "00", NULL, pfOut);
-                            byte_print(&index, "00", NULL, pfOut);
+                        written_count++;
+                        token = strtok(NULL, ",");
+                    }
+                    // init list shorter than expected
+                    // e.g. BTYE cell[4] = {1} PASSED
+                    if (written_count < count) {
+                        for (int i = 0; i < count - written_count; ++i) {
+                            if (unit == 1) {
+                                byte_print(&index, "00", NULL, pfOut);
+                            } else {
+                                byte_print(&index, "00", NULL, pfOut);
+                                byte_print(&index, "00", NULL, pfOut);
+                            }
                         }
                     }
-
+                }
+            } else {
+                // no { } exists, but [] exists, init with 0
+                // e.g. BYTE cell[10] PASSED
+                for (int i = 0; i < count; ++i) {
+                    if (unit == 1) {
+                        byte_print(&index, "00", NULL, pfOut);
+                    } else {
+                        byte_print(&index, "00", NULL, pfOut);
+                        byte_print(&index, "00", NULL, pfOut);
+                    }
                 }
             }
-                break;
+        } else {
+            // no [ ] , only one variable
+            char *equ_pointer;
+            if ((equ_pointer = strchr(a_line, '=')) != NULL) {
+                // e.g. BYTE cell = 3 PASSED
+                n = sscanf(equ_pointer + 1, "%i", &number);
+                if (n < 1) {
+                    printf("ERROR: no initialize value\n");
+                }
+                if (unit == 1) {
+                    byte_print(&index, "%02x", &number, pfOut);
+                } else {
+                    int tmp = number & 0x0F;
+                    byte_print(&index, "%02x", &tmp, pfOut);
+                    tmp = number & 0x0F0;
+                    byte_print(&index, "%02x", &tmp, pfOut);
+                }
+            } else {
+                // e.g. BYTE cell PASSED
+                if (unit == 1) {
+                    byte_print(&index, "00", NULL, pfOut);
+                } else {
+                    byte_print(&index, "00", NULL, pfOut);
+                    byte_print(&index, "00", NULL, pfOut);
+                }
+            }
+
         }
 
         fgets(a_line, MAX_LEN, pfIn);
