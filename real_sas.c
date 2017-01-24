@@ -120,12 +120,12 @@ int main(int argc, char *argv[]) {
                             printf("ERROR: INVALID INITIALIZER LIST\n");
                         }
                         if (unit == 1) {
-                            byte_print(&index, "%02x", &number, pfOut);
+                            byte_print(&index, "%02x", &number, pfOut, &offset);
                         } else {
                             int tmp = number & 0x0F;
-                            byte_print(&index, "%02x", &tmp, pfOut);
+                            byte_print(&index, "%02x", &tmp, pfOut, &offset);
                             tmp = number & 0x0F0;
-                            byte_print(&index, "%02x", &tmp, pfOut);
+                            byte_print(&index, "%02x", &tmp, pfOut, &offset);
                         }
                         written_count++;
                         token = strtok(NULL, ",");
@@ -135,10 +135,10 @@ int main(int argc, char *argv[]) {
                     if (written_count < count) {
                         for (int i = 0; i < count - written_count; ++i) {
                             if (unit == 1) {
-                                byte_print(&index, "00", NULL, pfOut);
+                                byte_print(&index, "00", NULL, pfOut, &offset);
                             } else {
-                                byte_print(&index, "00", NULL, pfOut);
-                                byte_print(&index, "00", NULL, pfOut);
+                                byte_print(&index, "00", NULL, pfOut, &offset);
+                                byte_print(&index, "00", NULL, pfOut, &offset);
                             }
                         }
                     }
@@ -148,10 +148,10 @@ int main(int argc, char *argv[]) {
                 // e.g. BYTE cell[10] PASSED
                 for (int i = 0; i < count; ++i) {
                     if (unit == 1) {
-                        byte_print(&index, "00", NULL, pfOut);
+                        byte_print(&index, "00", NULL, pfOut, &offset);
                     } else {
-                        byte_print(&index, "00", NULL, pfOut);
-                        byte_print(&index, "00", NULL, pfOut);
+                        byte_print(&index, "00", NULL, pfOut, &offset);
+                        byte_print(&index, "00", NULL, pfOut, &offset);
                     }
                 }
             }
@@ -165,20 +165,20 @@ int main(int argc, char *argv[]) {
                     printf("ERROR: no initialize value\n");
                 }
                 if (unit == 1) {
-                    byte_print(&index, "%02x", &number, pfOut);
+                    byte_print(&index, "%02x", &number, pfOut, &offset);
                 } else {
                     int tmp = number & 0x0F;
-                    byte_print(&index, "%02x", &tmp, pfOut);
+                    byte_print(&index, "%02x", &tmp, pfOut, &offset);
                     tmp = number & 0x0F0;
-                    byte_print(&index, "%02x", &tmp, pfOut);
+                    byte_print(&index, "%02x", &tmp, pfOut, &offset);
                 }
             } else {
                 // e.g. BYTE cell PASSED
                 if (unit == 1) {
-                    byte_print(&index, "00", NULL, pfOut);
+                    byte_print(&index, "00", NULL, pfOut, &offset);
                 } else {
-                    byte_print(&index, "00", NULL, pfOut);
-                    byte_print(&index, "00", NULL, pfOut);
+                    byte_print(&index, "00", NULL, pfOut, &offset);
+                    byte_print(&index, "00", NULL, pfOut, &offset);
                 }
             }
 
@@ -187,6 +187,13 @@ int main(int argc, char *argv[]) {
         fgets(a_line, MAX_LEN, pfIn);
     }
 
+    if (index > 0) {
+        for (int i = 0; i < 4-index; ++i) {
+            fprintf(pfOut, "00");
+        }
+    }
+
+    fprintf(pfOut, "\n0x%08x", offset);
 
 
 

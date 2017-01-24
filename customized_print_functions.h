@@ -6,7 +6,7 @@
 #define ASM_AND_SIMU_CUSTOMIZED_PRINT_FUNCTIONS_H
 
 #include <stdio.h>
-void byte_print(int *index, const char* format, void* arg, FILE* pfOut);
+void byte_print(int *index, const char *format, void *arg, FILE *pfOut, int *offset);
 
 
 #endif //ASM_AND_SIMU_CUSTOMIZED_PRINT_FUNCTIONS_H
