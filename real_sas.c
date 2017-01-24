@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 
 
     int index = 0, offset = 0, unit = 1, count = 0, number;
-    char *left_braket_pointer, *left_brace_pointer, *right_brace_pointer, *left_quote_pointer;
+    char *left_braket_pointer, *left_brace_pointer, *right_brace_pointer, *left_quote_ptr, *right_quote_ptr;
 
     fgets(a_line, MAX_LEN, pfIn);
     while (!feof(pfIn)) {
@@ -107,9 +107,10 @@ int main(int argc, char *argv[]) {
             if (n < 1) {
                 printf("ERROR: invalid array capicity!\n");
             }
-            int written_count = 0;
+
             if ((left_brace_pointer = strchr(a_line, '{')) != NULL) {
                 if ((right_brace_pointer = strchr(a_line, '}')) != NULL) {
+                    int written_count = 0;
                     //  {  } exists
                     // e.g. BYTE cell[4] = {1, 2, 3, 4} PASSED
                     *right_brace_pointer = '\0';
@@ -143,8 +144,27 @@ int main(int argc, char *argv[]) {
                         }
                     }
                 }
-            } else if ((left_quote_pointer = strchr(a_line, '"')) != NULL) {
-
+            } else if ((left_quote_ptr = strchr(a_line, '"')) != NULL) {
+                if ((right_quote_ptr = strchr(left_quote_ptr+1, '"')) != NULL) {
+                    if (unit != 1) {
+                        printf("ERROR: should declare byte with \" \" ");
+                        exit(-1);
+                    }
+                    int written_count = 0;
+                    char *ptr = left_quote_ptr+1;
+                    int num;
+                    while (ptr != right_quote_ptr) {
+                        num = *ptr;
+                        byte_print(&index, "%02x", &num, pfOut, &offset);
+                        ptr++;
+                        written_count++;
+                    }
+                    if (written_count < count) {
+                        for (int i = 0; i < count - written_count; ++i) {
+                            byte_print(&index, "00", NULL, pfOut, &offset);
+                        }
+                    }
+                }
             } else {
                 // no { } exists, but [] exists, init with 0
                 // e.g. BYTE cell[10] PASSED
