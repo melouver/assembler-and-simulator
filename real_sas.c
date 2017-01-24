@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 
 
     int index = 0, offset = 0, unit = 1, count = 0, number;
-    char *left_braket_pointer, *left_brace_pointer, *right_brace_pointer;
+    char *left_braket_pointer, *left_brace_pointer, *right_brace_pointer, *left_quote_pointer;
 
     fgets(a_line, MAX_LEN, pfIn);
     while (!feof(pfIn)) {
@@ -143,6 +143,8 @@ int main(int argc, char *argv[]) {
                         }
                     }
                 }
+            } else if ((left_quote_pointer = strchr(a_line, '"')) != NULL) {
+
             } else {
                 // no { } exists, but [] exists, init with 0
                 // e.g. BYTE cell[10] PASSED
@@ -191,9 +193,10 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < 4-index; ++i) {
             fprintf(pfOut, "00");
         }
+        fprintf(pfOut, "\n");
     }
 
-    fprintf(pfOut, "\n0x%08x", offset);
+    fprintf(pfOut, "0x%08x", offset);
 
 
 
