@@ -9,15 +9,27 @@
 
 struct ListNode {
     ElementType Element;
+    int offset;
     Position Next;
 };
 
 typedef Position List;
+typedef unsigned int index;
 
 struct HashTbl {
     int TableSize;
     List *TheLists;
 };
+
+index Hash(const char* Key, int TableSize) {
+    unsigned int HashVal = 0;
+
+    while (*Key != '\0') {
+        HashVal += *Key++;
+    }
+
+    return HashVal % TableSize;
+}
 
 HashTable InitializeTable(int TableSize) {
     HashTable H;
@@ -44,6 +56,66 @@ HashTable InitializeTable(int TableSize) {
 
     return H;
 }
+
+Position Find(ElementType Key, HashTable H) {
+    Position P;
+    List L;
+
+    L = H->TheLists[Hash(Key, H->TableSize)];
+    P = L->Next;
+    while (P != NULL && P->Element != Key) {
+        P = P->Next;
+    }
+
+    return P;
+}
+
+void Insert(ElementType Key, HashTable H, int offset) {
+    Position Pos, NewCell;
+    List L;
+
+    Pos = Find(Key, H);
+    if (Pos == NULL) {
+        NewCell = (Position)malloc(sizeof(struct ListNode));
+        if (NewCell == NULL) {
+            printf("Out of space!\n");
+        }else {
+            L = H->TheLists[Hash(Key, H->TableSize)];
+            NewCell->Next = L->Next;
+            NewCell->Element = Key;
+            NewCell->offset = offset;
+            L->Next = NewCell;
+        }
+
+    }
+}
+
+
+void PrintOffset(Position P) {
+    if (P == NULL) {
+        printf("Not found");
+        return;
+    }
+    
+    printf("Offset is %d", P->offset);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

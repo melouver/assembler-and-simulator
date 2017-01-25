@@ -15,7 +15,7 @@ typedef struct HashTbl* HashTable;
 HashTable InitializeTable(int TableSize);
 void DestroyTable(HashTable H);
 Position Find(ElementType Key, HashTable H);
-void Insert(ElementType Key, HashTable H);
+void Insert(ElementType Key, HashTable H, int offset);
 ElementType Retrieve(Position P);
-
+void PrintOffset(Position P);
 #endif //ASM_AND_SIMU_HASHTBL_H
