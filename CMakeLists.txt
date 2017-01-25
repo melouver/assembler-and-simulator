@@ -3,5 +3,5 @@ project(asm_and_simu C)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
-set(SOURCE_FILES ssim.c real_sas.c real_ssim.c customized_print_functions.h customized_print_functions.c)
+set(SOURCE_FILES main.c hashtbl.h hashtbl.c)
 add_executable(asm_and_simu ${SOURCE_FILES})

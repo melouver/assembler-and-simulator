@@ -7,6 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "customized_print_functions.h"
+#include "hashtbl.h"
 #define MAX_LEN 80
 #define INSTRS_COUNT (sizeof(g_instrs_name) / sizeof(g_instrs_name[0]))
 #define INSTR_SYM {"HLT", "JMP", "CJMP", "OJMP", "CALL", "RET",\
@@ -53,6 +54,47 @@ int main(int argc, char *argv[]) {
         printf("ERROR: cannot open file %s for writing! \n", argv[2]);
         return 0;
     }
+
+
+    HashTable H = InitializeTable(100);
+    char* column_ptr = NULL;
+    char label_name[50];
+    int line_no = 0;
+    int idx = 0;
+    char res[100][100];
+    fgets(a_line, MAX_LEN, pfIn);
+    while (!feof(pfIn)) {
+        n = sscanf(a_line, "%s", op_sym);
+        if ((pcPos = strchr(a_line, '#')) != NULL) {
+            *pcPos = '\0';
+        }
+
+        if (strcmp(op_sym, "BYTE") == 0 || strcmp(op_sym, "WORD") == 0) {
+            fgets(a_line, MAX_LEN, pfIn);
+            continue;
+        }
+
+        if ((column_ptr = strchr(a_line, ':')) != NULL) {
+            *column_ptr = '\0';
+            n = sscanf(a_line, "%s", label_name);
+
+            Insert(label_name, H, line_no);
+            strcpy(res[idx++], label_name);
+        }
+
+        line_no++;
+        fgets(a_line, MAX_LEN, pfIn);
+    }
+
+    Position P;
+    for (int i = 0; i < idx; ++i) {
+        P = Find(res[i], H);
+        printf("label is %s offset is %d\n", res[i], P ? GetOffset(P) : -1);
+    }
+
+    printf("SO FAR!");
+    rewind(pfIn);
+
 
     fgets(a_line, MAX_LEN, pfIn);
     while (!feof(pfIn)) {

@@ -18,4 +18,5 @@ Position Find(ElementType Key, HashTable H);
 void Insert(ElementType Key, HashTable H, int offset);
 ElementType Retrieve(Position P);
 void PrintOffset(Position P);
+int GetOffset(Position P);
 #endif //ASM_AND_SIMU_HASHTBL_H

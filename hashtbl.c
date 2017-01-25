@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <string.h>
 #include "hashtbl.h"
 
 struct ListNode {
@@ -63,7 +63,7 @@ Position Find(ElementType Key, HashTable H) {
 
     L = H->TheLists[Hash(Key, H->TableSize)];
     P = L->Next;
-    while (P != NULL && P->Element != Key) {
+    while (P != NULL && strcmp(Key, P->Element) != 0) {
         P = P->Next;
     }
 
@@ -82,7 +82,8 @@ void Insert(ElementType Key, HashTable H, int offset) {
         }else {
             L = H->TheLists[Hash(Key, H->TableSize)];
             NewCell->Next = L->Next;
-            NewCell->Element = Key;
+            NewCell->Element = (char*)malloc(sizeof(50));
+            strcpy(NewCell->Element, Key);
             NewCell->offset = offset;
             L->Next = NewCell;
         }
@@ -96,13 +97,14 @@ void PrintOffset(Position P) {
         printf("Not found");
         return;
     }
-    
+
     printf("Offset is %d", P->offset);
 }
 
 
-
-
+int GetOffset(Position P) {
+    return P->offset;
+}
 
 
 
