@@ -25,6 +25,7 @@ const char* g_instrs_name[] = INSTR_SYM;
 /*
  * Instructions format
  */
+HashTable H;
 
 const char instr_format[32] = instrs_format_macro;
 
@@ -56,7 +57,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    HashTable H = InitializeTable(100);
+    H = InitializeTable(100);
     char* column_ptr = NULL;
     char label_name[50];
     int line_no = 0;
@@ -77,7 +78,7 @@ int main(int argc, char *argv[]) {
         if ((column_ptr = strchr(a_line, ':')) != NULL) {
             *column_ptr = '\0';
             n = sscanf(a_line, "%s", label_name);
-            Insert(label_name, H, line_no);
+            Insert(label_name, H, line_no*4);
             strcpy(res[idx++], label_name);
         }
 
@@ -190,6 +191,7 @@ int main(int argc, char *argv[]) {
                 }
             } else if ((left_quote_ptr = strchr(a_line, '"')) != NULL) {
                 if ((right_quote_ptr = strchr(left_quote_ptr+1, '"')) != NULL) {
+                    // E.G. BYTE cell[4] = "1234"
                     if (unit != 1) {
                         printf("ERROR: should declare byte with \" \" ");
                         exit(-1);
@@ -203,6 +205,7 @@ int main(int argc, char *argv[]) {
                         ptr++;
                         written_count++;
                     }
+                    // E.G. BYTE cell[4] = "12"
                     if (written_count < count) {
                         for (int i = 0; i < count - written_count; ++i) {
                             byte_print(&index, "00", NULL, pfOut, &offset);
@@ -285,7 +288,7 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
     unsigned long op_code, arg1, arg2, arg3, addr, instr_code;
     char op_sym[8], reg0[8], reg1[8], reg2[8];
     int immediate, port, n;
-
+    char label[10];
     instr_code = 0ul;
 
     switch (instr_format[instr_num]) {
@@ -300,11 +303,13 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             /*
              * JMP CJMP OJMP CALL
              */
-            n = sscanf(instr_line, "%s 0x%lx", op_sym, &addr);
+            n = sscanf(instr_line, "%s %s", op_sym, label);
             if (n < 2) {
                 printf("ERROR: invalid instruction format! %s\n", instr_line);
                 exit(-1);
             }
+            addr = GetOffset(Find(label, H));
+            printf("OFFSET IS %lu\n", addr);
             op_code = GetInstrCode(op_sym);
             instr_code = (op_code << 27) | (addr & 0x0FFFFFF);
             break;
