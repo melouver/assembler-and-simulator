@@ -77,7 +77,6 @@ int main(int argc, char *argv[]) {
         if ((column_ptr = strchr(a_line, ':')) != NULL) {
             *column_ptr = '\0';
             n = sscanf(a_line, "%s", label_name);
-
             Insert(label_name, H, line_no);
             strcpy(res[idx++], label_name);
         }
@@ -91,17 +90,20 @@ int main(int argc, char *argv[]) {
         P = Find(res[i], H);
         printf("label is %s offset is %d\n", res[i], P ? GetOffset(P) : -1);
     }
-
     printf("SO FAR!");
     rewind(pfIn);
-
 
     fgets(a_line, MAX_LEN, pfIn);
     while (!feof(pfIn)) {
         if ((pcPos = strchr(a_line, '#')) != NULL) {
             *pcPos = '\0';
         }
-        n = sscanf(a_line, "%s", op_sym);
+
+        if ((column_ptr = strchr(a_line, ':')) != NULL) {
+            n = sscanf(column_ptr+1, "%s", op_sym);
+        }else {
+            n = sscanf(a_line, "%s", op_sym);
+        }
 
         if (strcmp(op_sym, "BYTE") == 0 || strcmp(op_sym, "WORD") == 0) {
             fgets(a_line, MAX_LEN, pfIn);
@@ -118,7 +120,7 @@ int main(int argc, char *argv[]) {
             exit(-1);
         }
 
-        fprintf(pfOut, "0x%08lx\n", TransToCode(a_line, op_num));
+        fprintf(pfOut, "0x%08lx\n", TransToCode(column_ptr?column_ptr+1:a_line, op_num));
         fgets(a_line, MAX_LEN, pfIn);
     }
     rewind(pfIn);
