@@ -8,12 +8,12 @@
 #include <ctype.h>
 #include "customized_print_functions.h"
 #include "hashtbl.h"
-#define MAX_LEN 80
+#define MAX_LEN 1000
 #define INSTRS_COUNT (sizeof(g_instrs_name) / sizeof(g_instrs_name[0]))
 #define INSTR_SYM {"HLT", "JMP", "CJMP", "OJMP", "CALL", "RET",\
                    "PUSH", "POP", "LOADB", "LOADW", "STOREB", "STOREW", \
                    "LOADI", "NOP", "IN", "OUT", "ADD", "ADDI", "SUB", "SUBI",\
-                   "MUL", "DIV", "ADN", "OR", "NOR", "NOTB", "SAL", "SAR", \
+                   "MUL", "DIV", "AND", "OR", "NOR", "NOTB", "SAL", "SAR", \
                    "EQU", "LT", "LTE", "NOTC"}
 
 #define instrs_format_macro "12222133444451667575777778778881"
@@ -25,7 +25,8 @@ const char* g_instrs_name[] = INSTR_SYM;
 /*
  * Instructions format
  */
-HashTable H;
+HashTable LineHash;
+HashTable DataHash;
 
 const char instr_format[32] = instrs_format_macro;
 
@@ -55,21 +56,26 @@ int main(int argc, char *argv[]) {
         printf("ERROR: cannot open file %s for writing! \n", argv[2]);
         return 0;
     }
+/*
+ * Build LineHash
+ */
 
-
-    H = InitializeTable(100);
+    LineHash = InitializeTable(100);
     char* column_ptr = NULL;
     char label_name[50];
     int line_no = 0;
-    int idx = 0;
-    char res[100][100];
+
     fgets(a_line, MAX_LEN, pfIn);
     while (!feof(pfIn)) {
-        n = sscanf(a_line, "%s", op_sym);
+
         if ((pcPos = strchr(a_line, '#')) != NULL) {
             *pcPos = '\0';
         }
-
+        n = sscanf(a_line, "%s", op_sym);
+        if (n < 1) {
+            fgets(a_line, MAX_LEN, pfIn);
+            continue;
+        }
         if (strcmp(op_sym, "BYTE") == 0 || strcmp(op_sym, "WORD") == 0) {
             fgets(a_line, MAX_LEN, pfIn);
             continue;
@@ -78,80 +84,61 @@ int main(int argc, char *argv[]) {
         if ((column_ptr = strchr(a_line, ':')) != NULL) {
             *column_ptr = '\0';
             n = sscanf(a_line, "%s", label_name);
-            Insert(label_name, H, line_no*4);
-            strcpy(res[idx++], label_name);
+            Insert(label_name, LineHash, line_no*4);
         }
 
         line_no++;
         fgets(a_line, MAX_LEN, pfIn);
     }
+    printf("Line Hash builded!\n");
 
-    Position P;
-    for (int i = 0; i < idx; ++i) {
-        P = Find(res[i], H);
-        printf("label is %s offset is %d\n", res[i], P ? GetOffset(P) : -1);
-    }
-    printf("SO FAR!");
-    rewind(pfIn);
-
-    fgets(a_line, MAX_LEN, pfIn);
-    while (!feof(pfIn)) {
-        if ((pcPos = strchr(a_line, '#')) != NULL) {
-            *pcPos = '\0';
-        }
-
-        if ((column_ptr = strchr(a_line, ':')) != NULL) {
-            n = sscanf(column_ptr+1, "%s", op_sym);
-        }else {
-            n = sscanf(a_line, "%s", op_sym);
-        }
-
-        if (strcmp(op_sym, "BYTE") == 0 || strcmp(op_sym, "WORD") == 0) {
-            fgets(a_line, MAX_LEN, pfIn);
-            continue;
-        }
-
-        if (n < 1) {
-            continue;
-        }
-
-        op_num = GetInstrCode(op_sym);
-        if (op_num > 31) {
-            printf("ERROR: %s is an invalid instruction!\n", a_line);
-            exit(-1);
-        }
-
-        fprintf(pfOut, "0x%08lx\n", TransToCode(column_ptr?column_ptr+1:a_line, op_num));
-        fgets(a_line, MAX_LEN, pfIn);
-    }
     rewind(pfIn);
 
 
+
+
+/*
+ * Write Data SEGMENT and Build data hash table
+ */
+    FILE *data_f;
+    if ((data_f = fopen("DATA_OUT", "w")) == NULL) {
+        printf("ERROR: cannot open file %s for writing! \n", argv[2]);
+        return 0;
+    }
+    DataHash = InitializeTable(100);
     int index = 0, offset = 0, unit = 1, count = 0, number;
     char *left_braket_pointer, *left_brace_pointer, *right_brace_pointer, *left_quote_ptr, *right_quote_ptr;
+    char var_name[10];
 
     fgets(a_line, MAX_LEN, pfIn);
     while (!feof(pfIn)) {
         if ((pcPos = strchr(a_line, '#')) != NULL)
             *pcPos = '\0';
+        n = sscanf(a_line, "%s %s", op_sym, var_name);
 
-        n = sscanf(a_line, "%s", op_sym);
-        if (n < 1) {
-            printf("ERROR: invalid instruction code!\n");
-            exit(-1);
+        if (n < 2) {
+            fgets(a_line, MAX_LEN, pfIn);
+            continue;
         }
         if (strcmp(op_sym, "BYTE") == 0) {
             unit = 1;
         } else if (strcmp(op_sym, "WORD") == 0) {
             unit = 2;
-        } else
-            break;
+        } else {
+            fgets(a_line, MAX_LEN, pfIn);
+            continue;
+        }
+        
+        int offset_tmp = offset;
 
         if ((left_braket_pointer = strchr(a_line, '[')) != NULL) {
             n = sscanf(left_braket_pointer + 1, "%d]", &count);
             if (n < 1) {
                 printf("ERROR: invalid array capicity!\n");
             }
+            *left_braket_pointer = '\0';
+            n = sscanf(a_line, "%s %s", op_sym, var_name);
+            *left_braket_pointer = '[';
 
             if ((left_brace_pointer = strchr(a_line, '{')) != NULL) {
                 if ((right_brace_pointer = strchr(a_line, '}')) != NULL) {
@@ -166,12 +153,12 @@ int main(int argc, char *argv[]) {
                             printf("ERROR: INVALID INITIALIZER LIST\n");
                         }
                         if (unit == 1) {
-                            byte_print(&index, "%02x", &number, pfOut, &offset);
+                            byte_print(&index, "%02x", &number, data_f, &offset);
                         } else {
                             int tmp = number & 0x0F;
-                            byte_print(&index, "%02x", &tmp, pfOut, &offset);
+                            byte_print(&index, "%02x", &tmp, data_f, &offset);
                             tmp = number & 0x0F0;
-                            byte_print(&index, "%02x", &tmp, pfOut, &offset);
+                            byte_print(&index, "%02x", &tmp, data_f, &offset);
                         }
                         written_count++;
                         token = strtok(NULL, ",");
@@ -181,10 +168,10 @@ int main(int argc, char *argv[]) {
                     if (written_count < count) {
                         for (int i = 0; i < count - written_count; ++i) {
                             if (unit == 1) {
-                                byte_print(&index, "00", NULL, pfOut, &offset);
+                                byte_print(&index, "00", NULL, data_f, &offset);
                             } else {
-                                byte_print(&index, "00", NULL, pfOut, &offset);
-                                byte_print(&index, "00", NULL, pfOut, &offset);
+                                byte_print(&index, "00", NULL, data_f, &offset);
+                                byte_print(&index, "00", NULL, data_f, &offset);
                             }
                         }
                     }
@@ -201,14 +188,14 @@ int main(int argc, char *argv[]) {
                     int num;
                     while (ptr != right_quote_ptr) {
                         num = *ptr;
-                        byte_print(&index, "%02x", &num, pfOut, &offset);
+                        byte_print(&index, "%02x", &num, data_f, &offset);
                         ptr++;
                         written_count++;
                     }
                     // E.G. BYTE cell[4] = "12"
                     if (written_count < count) {
                         for (int i = 0; i < count - written_count; ++i) {
-                            byte_print(&index, "00", NULL, pfOut, &offset);
+                            byte_print(&index, "00", NULL, data_f, &offset);
                         }
                     }
                 }
@@ -217,10 +204,10 @@ int main(int argc, char *argv[]) {
                 // e.g. BYTE cell[10] PASSED
                 for (int i = 0; i < count; ++i) {
                     if (unit == 1) {
-                        byte_print(&index, "00", NULL, pfOut, &offset);
+                        byte_print(&index, "00", NULL, data_f, &offset);
                     } else {
-                        byte_print(&index, "00", NULL, pfOut, &offset);
-                        byte_print(&index, "00", NULL, pfOut, &offset);
+                        byte_print(&index, "00", NULL, data_f, &offset);
+                        byte_print(&index, "00", NULL, data_f, &offset);
                     }
                 }
             }
@@ -230,46 +217,108 @@ int main(int argc, char *argv[]) {
             if ((equ_pointer = strchr(a_line, '=')) != NULL) {
                 // e.g. BYTE cell = 3 PASSED
                 n = sscanf(equ_pointer + 1, "%i", &number);
+                *equ_pointer = '\0';
+                n = sscanf(a_line, "%s %s", op_sym, var_name);
+
+                *equ_pointer = '=';
                 if (n < 1) {
                     printf("ERROR: no initialize value\n");
                 }
                 if (unit == 1) {
-                    byte_print(&index, "%02x", &number, pfOut, &offset);
+                    byte_print(&index, "%02x", &number, data_f, &offset);
                 } else {
                     int tmp = number & 0x0F;
-                    byte_print(&index, "%02x", &tmp, pfOut, &offset);
+                    byte_print(&index, "%02x", &tmp, data_f, &offset);
                     tmp = number & 0x0F0;
-                    byte_print(&index, "%02x", &tmp, pfOut, &offset);
+                    byte_print(&index, "%02x", &tmp, data_f, &offset);
                 }
             } else {
                 // e.g. BYTE cell PASSED
+                n = sscanf(a_line, "%s %s", op_sym, var_name);
                 if (unit == 1) {
-                    byte_print(&index, "00", NULL, pfOut, &offset);
+                    byte_print(&index, "00", NULL, data_f, &offset);
                 } else {
-                    byte_print(&index, "00", NULL, pfOut, &offset);
-                    byte_print(&index, "00", NULL, pfOut, &offset);
+                    byte_print(&index, "00", NULL, data_f, &offset);
+                    byte_print(&index, "00", NULL, data_f, &offset);
                 }
             }
 
+
         }
+
+        Insert(var_name, DataHash, offset_tmp);
 
         fgets(a_line, MAX_LEN, pfIn);
     }
 
     if (index > 0) {
         for (int i = 0; i < 4-index; ++i) {
-            fprintf(pfOut, "00");
+            fprintf(data_f, "00");
         }
-        fprintf(pfOut, "\n");
+        fprintf(data_f, "\n");
     }
 
-    fprintf(pfOut, "0x%08x", offset);
+    fprintf(data_f, "0x%08x", offset);
 
+    rewind(pfIn);
+    printf("data seg scanned and builded\n");
+/*
+ * TransToCode
+ */
+    fgets(a_line, MAX_LEN, pfIn);
+
+    FILE *std_output;
+    if ((std_output = fopen("queen.dat", "r")) == NULL) {
+        printf("ERROR: open file :%s", "queen.dat");
+        exit(-1);
+    }
+    char output_code_char[100];
+    fgets(output_code_char, 100, std_output);
+
+    while (!feof(pfIn)) {
+        if ((pcPos = strchr(a_line, '#')) != NULL) {
+            *pcPos = '\0';
+        }
+        printf("Now processing instruction : %s.......\n", a_line);
+        if ((column_ptr = strchr(a_line, ':')) != NULL) {
+            n = sscanf(column_ptr+1, "%s", op_sym);
+        }else {
+            n = sscanf(a_line, "%s", op_sym);
+        }
+
+        if (n < 1) {
+            fgets(a_line, MAX_LEN, pfIn);
+            continue;
+        }
+
+        if (strcmp(op_sym, "BYTE") == 0 || strcmp(op_sym, "WORD") == 0) {
+            fgets(a_line, MAX_LEN, pfIn);
+            continue;
+        }
+
+        op_num = GetInstrCode(op_sym);
+        if (op_num > 31) {
+            printf("ERROR: %s is an invalid instruction!\n", a_line);
+            exit(-1);
+        }
+
+        output_code_char[10] = '\0';
+        char program_write_code[100];
+        sprintf(program_write_code, "0x%08lx", TransToCode(column_ptr?column_ptr+1:a_line, op_num));
+        if ((strcmp(program_write_code, output_code_char)) != 0) {
+            printf("ERROR HRER");
+            exit(-1);
+        }
+        fgets(output_code_char, 100, std_output);
+        fprintf(pfOut, "0x%08lx\n", TransToCode(column_ptr?column_ptr+1:a_line, op_num));
+        fgets(a_line, MAX_LEN, pfIn);
+    }
+    rewind(pfIn);
 
 
     fclose(pfIn);
     fclose(pfOut);
-
+    fclose(data_f);
     return 0;
 }
 
@@ -308,8 +357,7 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
                 printf("ERROR: invalid instruction format! %s\n", instr_line);
                 exit(-1);
             }
-            addr = GetOffset(Find(label, H));
-            printf("OFFSET IS %lu\n", addr);
+            addr = GetOffset(Find(label, LineHash));
             op_code = GetInstrCode(op_sym);
             instr_code = (op_code << 27) | (addr & 0x0FFFFFF);
             break;
@@ -330,12 +378,13 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             /*
              * LOADB LOADW STOREB STOREW
              */
-            n = sscanf(instr_line, "%s %s 0x%lx", op_sym, reg0, &addr);
+            n = sscanf(instr_line, "%s %s %s", op_sym, reg0, label);
             if (n < 3) {
                 printf("ERROR: invalid instruction format! %s\n", instr_line);
                 exit(-1);
             }
             op_code = GetInstrCode(op_sym);
+            addr = GetOffset(Find(label, DataHash));
             arg1 = GetRegNum(instr_line, reg0);
             instr_code = (op_code << 27) | (arg1 << 24) | (addr & 0x0ffffff);
             break;
@@ -350,7 +399,7 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             }
             op_code = GetInstrCode(op_sym);
             arg1 = GetRegNum(instr_line, reg0);
-            instr_code = (op_code << 27) | (arg1 << 24) | (immediate & 0x0FFF);
+            instr_code = (op_code << 27) | (arg1 << 24) | (immediate & 0x0FFFF);
             break;
         case '6':
             /*
@@ -364,7 +413,7 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             }
             op_code = GetInstrCode(op_sym);
             arg1 = GetRegNum(instr_line, reg0);
-            instr_code = (op_code << 27) | (arg1 << 24) | (port & 0x0ff);
+            instr_code = (op_code << 27) | (arg1 << 24) | (port & 0x0FF);
             break;
         case '7':
             /*
@@ -379,7 +428,7 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             arg1 = GetRegNum(instr_line, reg0);
             arg2 = GetRegNum(instr_line, reg1);
             arg3 = GetRegNum(instr_line, reg2);
-            instr_code = (op_code << 27) | (arg1 < 24) | (arg2 << 20) | (arg3 << 16);
+            instr_code = (op_code << 27) | (arg1 << 24) | (arg2 << 20) | (arg3 << 16);
             break;
         case '8':
             /*
@@ -395,11 +444,8 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             arg2 = GetRegNum(instr_line, reg1);
             instr_code = (op_code << 27) | (arg1 << 24) | (arg2 << 20);
             break;
-
-
-
-
     }
+    printf("instruction code is %08lx", instr_code);
     return instr_code;
 }
 
