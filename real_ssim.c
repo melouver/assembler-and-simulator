@@ -1,6 +1,3 @@
-//
-// Created by melouver on 1/16/17.
-//
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -141,57 +138,13 @@ int main(int argc, char* argv[]) {
     }
 
     free(MEM);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     return 0;
 }
 
 int HLT() {
     return 0;
 }
+
 int JMP() {
     PC = (unsigned int*)(CS + ADDRESS);
 
@@ -213,7 +166,7 @@ int OJMP() {
 int CALL() {
     memcpy(es_stack_pointer, GR, sizeof(short)*8);
     es_stack_pointer += sizeof(short)*8;
-    memcpy(es_stack_pointer, PSW, sizeof(PSW));
+    memcpy(es_stack_pointer, &PSW, sizeof(PSW));
     es_stack_pointer += sizeof(PSW);
     memcpy(es_stack_pointer, PC, sizeof(unsigned int));
     es_stack_pointer += sizeof(unsigned int);
@@ -225,21 +178,21 @@ int RET() {
     es_stack_pointer -= sizeof(unsigned int);
     memcpy(PC, es_stack_pointer, sizeof(unsigned int));
     es_stack_pointer -= sizeof(PSW);
-    memcpy(PSW, es_stack_pointer, sizeof(PSW));
+    memcpy(&PSW, es_stack_pointer, sizeof(PSW));
     es_stack_pointer -= sizeof(short)*8;
     memcpy(GR, es_stack_pointer, sizeof(short)*8);
     return 1;
 }
 
 int PUSH() {
-    memcpy(ss_stack_pointer, GR[REG0], sizeof(short));
+    memcpy(ss_stack_pointer, GR+REG0, sizeof(short));
     ss_stack_pointer += sizeof(short );
     return 1;
 }
 
 int POP() {
     ss_stack_pointer -= sizeof(short);
-    memcpy(GR[REG0], ss_stack_pointer, sizeof(short));
+    memcpy(GR+REG0, ss_stack_pointer, sizeof(short));
     return 1;
 }
 
@@ -340,21 +293,101 @@ int SUBI() {
 
 int MUL() {
     GR[REG0] = GR[REG1] * GR[REG2];
+    int res = GR[REG1] * GR[REG2];
 
-    
+    if (res > 32767 || res < -2768) {
+        PSW.overflow_flg = 1;
+    }else {
+        PSW.overflow_flg = 0;
+    }
+
+    return 1;
 }
 
-int DIV();
-int AND();
-int OR();
-int NOR();
-int NOTB();
-int SAL();
-int SAR();
-int EQU();
-int LT();
-int LTE();
-int NOTC();
+int DIV() {
+    if (GR[REG2] == 0) {
+        printf("divide 0 fatal error!\n");
+        exit(-1);
+    }
+
+    GR[REG0] = GR[REG1] / GR[REG2];
+    return 1;
+}
+
+int AND() {
+    GR[REG0] = GR[REG1] & GR[REG2];
+
+    return 1;
+}
+
+
+int OR() {
+    GR[REG0] = GR[REG1] | GR[REG2];
+
+    return 1;
+}
+
+int NOR() {
+    GR[REG0] = GR[REG1] ^ GR[REG2];
+
+    return 1;
+}
+
+int NOTB() {
+    GR[REG0] = ~GR[REG1];
+
+    return 1;
+}
+
+int SAL() {
+    GR[REG0] = GR[REG1] << GR[REG2];
+
+    return 1;
+}
+
+int SAR() {
+    GR[REG0] = GR[REG1] >> GR[REG2];
+
+    return 1;
+}
+int EQU() {
+    if (GR[REG0] == GR[REG1]) {
+        PSW.compare_flg = 1;
+    }else {
+        PSW.compare_flg = 0;
+    }
+
+    return 1;
+}
+
+int LT() {
+    if (GR[REG0] < GR[REG1]) {
+        PSW.compare_flg = 1;
+    }else {
+        PSW.compare_flg = 0;
+    }
+
+    return 1;
+}
+
+int LTE() {
+    if (GR[REG0] <= GR[REG1]) {
+        PSW.compare_flg = 1;
+    }else {
+        PSW.compare_flg = 0;
+    }
+    return 1;
+}
+
+int NOTC() {
+    if (PSW.compare_flg == 1) {
+        PSW.compare_flg = 0;
+    }else if (PSW.compare_flg == 0) {
+        PSW.compare_flg = 1;
+    }
+
+    return 1;
+}
 
 
 
