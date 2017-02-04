@@ -130,7 +130,7 @@ t1:       ADDI     D        1              # D = D + 1
 
           # 在E行A列单元上用行号B做标记
 t2:       PUSH     A                       # A入栈
-          PUSH     B                       # B入栈
+          PUSH     B                       # B入栈A
           PUSH     E                       # 需做标记的行E入栈
           CALL     mark                    # 调用子程序mark，在第E行上做标记
 

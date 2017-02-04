@@ -32,15 +32,15 @@ PROG_STATE_WORD PSW;
 
 unsigned int IR;
 
-int HLT();
-int JMP();
-int CJMP();
-int OJMP();
-int CALL();
-int RET();
-int PUSH();
+int HLT();//ok
+int JMP();//ok
+int CJMP();//ok
+int OJMP();//ok
+int CALL();//?
+int RET();//?
+int PUSH();//
 int POP();
-int LOADB();
+int LOADB();//ok
 int LOADW();
 int STOREB();
 int STOREW();
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
                       SAL, SAR, EQU, LT, LTE, NOTC};
 
     FILE* code_IR_file, *data_seg_file;
-    int ret, n;
+    int ret = 1, n;
 
     if (argc < 3) {
         printf("ERROR: no enough command line arguments!\n");
@@ -114,19 +114,37 @@ int main(int argc, char* argv[]) {
         printf("Failed to open file: %s", argv[3]);
         exit(-1);
     }
-
+    unsigned char* tmp = (unsigned char*)PC;
     fscanf(data_seg_file, "%i", &instruction);
     while (!feof(data_seg_file)) {
-        memcpy(PC, &instruction, sizeof(instruction));
+        unsigned  char *byte_ptr = (unsigned char*)PC;
+        unsigned char tmp;
+        for (int i = 3; i >= 0; --i) {
+            tmp = instruction >> (i*8);
+            memcpy(byte_ptr++, &tmp, sizeof(unsigned char));
+        }
         PC++;
         fscanf(data_seg_file, "%i", &instruction);
+    }
+    int this_line_cnt = 0;
+    unsigned char* tmp1 = (unsigned char*)PC;
+    for (;tmp != tmp1; tmp++) {
+        this_line_cnt++;
+        if (this_line_cnt == 4) {
+            printf("\n");
+        }
+        printf("  %d", *tmp);
     }
     fclose(data_seg_file);
     /* SS and ES have same capcity*/
     ss_stack_pointer = SS = (unsigned char*)PC;
 
     es_stack_pointer = ES = (SS + (MEM + mem_size - SS)/2);
-
+ /*   printf("cs has %d", DS-CS);
+    printf("ds has %d", es_stack_pointer-DS);
+    printf("ES > SS = %d", es_stack_pointer-ss_stack_pointer);
+    printf("ES has %d space", (MEM+mem_size-ES));
+    */
     /*
      * reset PC to the beginning of code
      */
@@ -181,6 +199,7 @@ int RET() {
     memcpy(&PSW, es_stack_pointer, sizeof(PSW));
     es_stack_pointer -= sizeof(short)*8;
     memcpy(GR, es_stack_pointer, sizeof(short)*8);
+
     return 1;
 }
 
@@ -197,22 +216,22 @@ int POP() {
 }
 
 int LOADB() {
-    GR[REG0] = (short )(* (unsigned char*)(DS + ADDRESS + GR[6]));
+    GR[REG0] = (short )(* (unsigned char*)(DS + ADDRESS + GR[7]));
     return 1;
 }
 
 int LOADW() {
-    GR[REG0] = *(short *)(DS + ADDRESS + GR[6]*2);
+    GR[REG0] = *(short *)(DS + ADDRESS + GR[7]*2);
     return 1;
 }
 
 int STOREB() {
-    *(DS + ADDRESS + GR[6]) = GR[REG0];
+    *(DS + ADDRESS + GR[7]) = GR[REG0];
     return 1;
 }
 
 int STOREW() {
-    *(short *)(DS + ADDRESS + GR[6]*2) = GR[REG0];
+    *(short *)(DS + ADDRESS + GR[7]*2) = GR[REG0];
     return 1;
 }
 
@@ -274,6 +293,9 @@ int SUB() {
         PSW.overflow_flg = GR[REG0] > GR[REG1] ? 0 : 1;
     }
 
+    printf("SUBSTRACTING register %c with register %c and "
+                   "assign it to register %c\n", REG1+'A'-1,
+    REG2+'A'-1, REG0+'A'-1);
     return 1;
 }
 
@@ -295,7 +317,7 @@ int MUL() {
     GR[REG0] = GR[REG1] * GR[REG2];
     int res = GR[REG1] * GR[REG2];
 
-    if (res > 32767 || res < -2768) {
+    if (res > 32767 || res < -32768) {
         PSW.overflow_flg = 1;
     }else {
         PSW.overflow_flg = 0;
