@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     FILE *pfIn, *pfOut;
 
     int n;
-    if (argc < 3) {
+    if (argc < 2) {
         printf("ERROR: no enough command line arguments!\n");
         return 0;
     }
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if ((pfOut = fopen(argv[2], "w")) == NULL) {
+    if ((pfOut = fopen("unitOut", "w")) == NULL) {
         printf("ERROR: cannot open file %s for writing! \n", argv[2]);
         return 0;
     }
@@ -306,8 +306,8 @@ int main(int argc, char *argv[]) {
         char program_write_code[100];
         sprintf(program_write_code, "0x%08lx", TransToCode(column_ptr?column_ptr+1:a_line, op_num));
         if ((strcmp(program_write_code, output_code_char)) != 0) {
-            printf("ERROR HRER");
-            exit(-1);
+            printf("ERROR HRER\n");
+
         }
         fgets(output_code_char, 100, std_output);
         fprintf(pfOut, "0x%08lx\n", TransToCode(column_ptr?column_ptr+1:a_line, op_num));

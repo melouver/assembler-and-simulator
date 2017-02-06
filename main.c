@@ -2,30 +2,19 @@
 #include <string.h>
 #include "stack.h"
 
+typedef struct _PROG_STATE_WORD {
+    unsigned short overflow_flg: 1;
+    unsigned short compare_flg: 1;
+    unsigned short reserve: 14;
+}PROG_STATE_WORD;
+
+PROG_STATE_WORD PSW;
 
 int main() {
-    short G[8] = {1,2,3,4,5,6,7,8};
-    unsigned char MEM[100];
-    unsigned char* ptr = MEM;
-    unsigned int i = 3;
-    unsigned int* PC = &i;
-    memcpy(ptr, G, sizeof(short)*8);
-    ptr += sizeof(short)*8;
-    memcpy(ptr, PC, sizeof(unsigned int));
-    ptr += sizeof(unsigned int);
+    short a = 58;
+    int b = a & 0x0F;
 
-    i = 0;
-    for (int i = 0; i < 8; ++i) {
-        G[i] = 0;
-    }
-    ptr -= sizeof(unsigned int);
-    memcpy(PC, ptr, sizeof(unsigned int));
-
-    ptr -= sizeof(short) * 8;
-    memcpy(G, ptr, sizeof(short) * 8);
-
-
-
+    printf("%c", a);
 
     return 0;
 }
