@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
     }
     fclose(code_IR_file);
 
-    printf("\n\n\n\n");
+
     DS = (unsigned char*)PC;
     /* write data segment*/
 
@@ -148,7 +148,6 @@ int main(int argc, char* argv[]) {
 
     fclose(data_seg_file);
 
-    printf("\n\n\n\n");
     /* SS and ES have same capcity*/
     ss_stack_pointer = SS = (unsigned char*)PC;
 
@@ -165,13 +164,6 @@ int main(int argc, char* argv[]) {
      *
      * reset PC to the beginning of code
      */
-
-
-
-
-
-
-
     PC = (unsigned int*) MEM;
     while (ret) {
         IR = *PC;
@@ -184,32 +176,32 @@ int main(int argc, char* argv[]) {
 }
 
 int HLT() {
-    printf("now HLT\n");
+
     return 0;
 }
 
 int JMP() {
     PC = (unsigned int*)(CS + ADDRESS);
-    printf("now JMP\n");
+
     return 1;
 }
 
 int CJMP() {
-    printf("now CJMP\n");
+
     if (PSW.compare_flg)
         PC = (unsigned int*)(MEM + ADDRESS);
     return 1;
 }
 
 int OJMP() {
-    printf("now OJMP\n");
+
     if (PSW.overflow_flg)
         PC = (unsigned int*)(MEM + ADDRESS);
     return 1;
 }
 
 int CALL() {
-    printf("now CALL\n");
+
     memcpy(es_stack_pointer, GR, sizeof(short)*8);
     es_stack_pointer += sizeof(short)*8;
     memcpy(es_stack_pointer, &PSW, sizeof(PSW));
@@ -221,10 +213,10 @@ int CALL() {
 }
 
 int RET() {
-    printf("now RET\n");
+
     es_stack_pointer -= sizeof(unsigned int*);
     memcpy(&PC, es_stack_pointer, sizeof(unsigned int*));
-    printf("AFTER RETURN PC is %x", *PC);
+
     es_stack_pointer -= sizeof(PSW);
     memcpy(&PSW, es_stack_pointer, sizeof(PSW));
     es_stack_pointer -= sizeof(short)*8;
@@ -234,73 +226,73 @@ int RET() {
 }
 
 int PUSH() {
-    printf("now PUSH\n");
+
     memcpy(ss_stack_pointer, GR+REG0, sizeof(short));
     ss_stack_pointer += sizeof(short );
     return 1;
 }
 
 int POP() {
-    printf("now POP\n");
+
     ss_stack_pointer -= sizeof(short);
     memcpy(GR+REG0, ss_stack_pointer, sizeof(short));
     return 1;
 }
 
 int LOADB() {
-    printf("now LOADB\n");
+
     GR[REG0] = (short )(* (unsigned char*)(DS + ADDRESS + GR[7]));
     return 1;
 }
 
 int LOADW() {
-    printf("now LOADW\n");
+
     GR[REG0] = *(short *)(DS + ADDRESS + GR[7]*2);
     return 1;
 }
 
 int STOREB() {
-    printf("now STOREB\n");
+
     *(unsigned char*)(DS + ADDRESS + GR[7]) = GR[REG0];
     return 1;
 }
 
 int STOREW() {
-    printf("now STOREW\n");
+
     *(short *)(DS + ADDRESS + GR[7]*2) = GR[REG0];
     return 1;
 }
 
 int LOADI() {
-    printf("now LOADI\n");
+
     GR[REG0] = (short)IMMEDIATE;
     return 1;
 }
 
 int NOP() {
-    printf("now NOP\n");
+
     return 1;
 }
 
 int IN() {
-    printf("now IN\n");
+
     //TODO: make PORT useful!!!!
     char ch;
     ch = getchar();
     GR[REG0] = (short)(ch & 0x00FF);
-    printf("GOT %u\n", GR[REG0]);
     return 1;
 }
 
 
 int OUT() {
-    printf("now OUT\n");
-    fprintf(solution, "%c", GR[REG0]);
+
+    //fprintf(solution, "%c", GR[REG0]);
+    printf("%c", GR[REG0]);
     return 1;
 }
 
 int ADD() {
-    printf("now ADD\n");
+
     GR[REG0] = GR[REG1] + GR[REG2];
     if (GR[REG2] >= 0) {
         PSW.overflow_flg = GR[REG0] < GR[REG1] ? 1 : 0;
@@ -311,7 +303,7 @@ int ADD() {
 }
 
 int ADDI(){
-    printf("now ADDI\n");
+
     short reg1 = GR[REG0];
 
     GR[REG0] = reg1 + (short)IMMEDIATE;
@@ -326,7 +318,7 @@ int ADDI(){
 }
 
 int SUB() {
-    printf("now SUB\n");
+
 
     GR[REG0] = GR[REG1] - GR[REG2];
 
@@ -335,16 +327,11 @@ int SUB() {
     }else if (GR[REG2] < 0) {
         PSW.overflow_flg = GR[REG0] > GR[REG1] ? 0 : 1;
     }
-
-    printf("SUBSTRACTING register %c with register %c and "
-                   "assign it to register %c\n", REG1+'A'-1,
-    REG2+'A'-1, REG0+'A'-1);
-    printf("PC IS %u", *PC);
     return 1;
 }
 
 int SUBI() {
-    printf("now SUBI\n");
+
     short reg1 = GR[REG0];
     short ime = (short)IMMEDIATE;
     GR[REG0] = reg1 - ime;
@@ -359,7 +346,7 @@ int SUBI() {
 }
 
 int MUL() {
-    printf("now MUL\n");
+
     GR[REG0] = GR[REG1] * GR[REG2];
     int res = GR[REG1] * GR[REG2];
 
@@ -373,7 +360,7 @@ int MUL() {
 }
 
 int DIV() {
-    printf("now DIV\n");
+
     if (GR[REG2] == 0) {
         printf("divide 0 fatal error!\n");
         exit(-1);
@@ -385,27 +372,27 @@ int DIV() {
 
 int AND() {
     GR[REG0] = GR[REG1] & GR[REG2];
-    printf("now AND\n");
+
     return 1;
 }
 
 
 int OR() {
-    printf("now OR\n");
+
     GR[REG0] = GR[REG1] | GR[REG2];
 
     return 1;
 }
 
 int NOR() {
-    printf("now NOR\n");
+
     GR[REG0] = GR[REG1] ^ GR[REG2];
 
     return 1;
 }
 
 int NOTB() {
-    printf("now NOTB\n");
+
 
     GR[REG0] = ~GR[REG1];
 
@@ -414,18 +401,18 @@ int NOTB() {
 
 int SAL() {
     GR[REG0] = GR[REG1] << GR[REG2];
-    printf("now SAL\n");
+
     return 1;
 }
 
 int SAR() {
-    printf("now SAR\n");
+
     GR[REG0] = GR[REG1] >> GR[REG2];
 
     return 1;
 }
 int EQU() {
-    printf("now EQU\n");
+
     if (GR[REG0] == GR[REG1]) {
         PSW.compare_flg = 1;
     }else {
@@ -436,7 +423,7 @@ int EQU() {
 }
 
 int LT() {
-    printf("now LT\n");
+
     if (GR[REG0] < GR[REG1]) {
         PSW.compare_flg = 1;
     }else {
@@ -447,7 +434,7 @@ int LT() {
 }
 
 int LTE() {
-    printf("now LTE\n");
+
     if (GR[REG0] <= GR[REG1]) {
         PSW.compare_flg = 1;
     }else {
@@ -457,7 +444,7 @@ int LTE() {
 }
 
 int NOTC() {
-    printf("now NOTC\n");
+
     if (PSW.compare_flg == 1) {
         PSW.compare_flg = 0;
     }else if (PSW.compare_flg == 0) {
