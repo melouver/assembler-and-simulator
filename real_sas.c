@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
         fprintf(data_f, "\n");
     }
 
-    fprintf(data_f, "0x%08x", offset);
+    fprintf(data_f, "0x%08x\n", offset);
 
     rewind(pfIn);
     printf("data seg scanned and builded\n");
@@ -308,12 +308,25 @@ int main(int argc, char *argv[]) {
         fprintf(pfOut, "0x%08lx\n", TransToCode(column_ptr?column_ptr+1:a_line, op_num));
         fgets(a_line, MAX_LEN, pfIn);
     }
-    rewind(pfIn);
+    fclose(data_f);
+    FILE* last_file;
 
+    if ((last_file = fopen("DATA_OUT", "r")) == NULL) {
+        printf("ERROR: can't open file %s", "DATA_OUT");
+        exit(-1);
+    }
 
+    unsigned int ins;
+
+    fscanf(last_file, "%i", &ins);
+    while (!feof(last_file)) {
+        fprintf(pfOut, "0x%08lx\n", ins);
+        fscanf(last_file, "%i", &ins);
+    }
+
+    fclose(last_file);
     fclose(pfIn);
     fclose(pfOut);
-    fclose(data_f);
     return 0;
 }
 
