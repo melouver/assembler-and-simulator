@@ -44,7 +44,6 @@ void PrintMemory(unsigned long mem_size) {
     }
 }
 
-FILE* solution;
 int HLT();//ok
 int JMP();//ok
 int CJMP();//ok
@@ -93,9 +92,7 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
-    if ((solution = fopen("solution", "w")) == NULL) {
-        exit(-1);
-    }
+
     n = sscanf(argv[1], "%li", &mem_size);
     if (n < 1) {
         printf("ERROR: argument %s is invalid!\n", argv[1]);
@@ -152,16 +149,7 @@ int main(int argc, char* argv[]) {
     ss_stack_pointer = SS = (unsigned char*)PC;
 
     es_stack_pointer = ES = (SS + (MEM + mem_size - SS)/2);
- /*   printf("cs has %d", DS-CS);
-    printf("ds has %d", es_stack_pointer-DS);
-    printf("ES > SS = %d", es_stack_pointer-ss_stack_pointer);
-    printf("ES has %d space", (MEM+mem_size-ES));
-    */
     /*
-     *
-     *
-     *
-     *
      * reset PC to the beginning of code
      */
     PC = (unsigned int*) MEM;
@@ -170,31 +158,26 @@ int main(int argc, char* argv[]) {
         PC++;
         ret = (*ops[OPCODE])();
     }
-
     free(MEM);
     return 0;
 }
 
 int HLT() {
-
     return 0;
 }
 
 int JMP() {
     PC = (unsigned int*)(CS + ADDRESS);
-
     return 1;
 }
 
 int CJMP() {
-
     if (PSW.compare_flg)
         PC = (unsigned int*)(MEM + ADDRESS);
     return 1;
 }
 
 int OJMP() {
-
     if (PSW.overflow_flg)
         PC = (unsigned int*)(MEM + ADDRESS);
     return 1;
@@ -209,6 +192,7 @@ int CALL() {
     memcpy(es_stack_pointer, &PC, sizeof(unsigned int*));
     es_stack_pointer += sizeof(unsigned int*);
     PC = (unsigned int*)(CS + ADDRESS);
+
     return 1;
 }
 
@@ -216,7 +200,6 @@ int RET() {
 
     es_stack_pointer -= sizeof(unsigned int*);
     memcpy(&PC, es_stack_pointer, sizeof(unsigned int*));
-
     es_stack_pointer -= sizeof(PSW);
     memcpy(&PSW, es_stack_pointer, sizeof(PSW));
     es_stack_pointer -= sizeof(short)*8;
@@ -264,7 +247,6 @@ int STOREW() {
 }
 
 int LOADI() {
-
     GR[REG0] = (short)IMMEDIATE;
     return 1;
 }
@@ -444,7 +426,6 @@ int LTE() {
 }
 
 int NOTC() {
-
     if (PSW.compare_flg == 1) {
         PSW.compare_flg = 0;
     }else if (PSW.compare_flg == 0) {

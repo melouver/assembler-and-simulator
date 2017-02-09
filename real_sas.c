@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if ((pfOut = fopen("unitOut", "w")) == NULL) {
+    if ((pfOut = fopen(argv[2], "w")) == NULL) {
         printf("ERROR: cannot open file %s for writing! \n", argv[2]);
         return 0;
     }
@@ -267,13 +267,9 @@ int main(int argc, char *argv[]) {
  */
     fgets(a_line, MAX_LEN, pfIn);
 
-    FILE *std_output;
-    if ((std_output = fopen("queen.dat", "r")) == NULL) {
-        printf("ERROR: open file :%s", "queen.dat");
-        exit(-1);
-    }
+
     char output_code_char[100];
-    fgets(output_code_char, 100, std_output);
+
 
     while (!feof(pfIn)) {
         if ((pcPos = strchr(a_line, '#')) != NULL) {
@@ -309,7 +305,6 @@ int main(int argc, char *argv[]) {
             printf("ERROR HRER\n");
 
         }
-        fgets(output_code_char, 100, std_output);
         fprintf(pfOut, "0x%08lx\n", TransToCode(column_ptr?column_ptr+1:a_line, op_num));
         fgets(a_line, MAX_LEN, pfIn);
     }

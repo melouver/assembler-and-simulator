@@ -1,0 +1,172 @@
+BYTE sign = 1
+BYTE num[10]
+BYTE c
+WORD digit_num = 0
+WORD res = 0
+
+IN C 0 # C stores byte c
+LOADI D -1
+EQU C D
+CJMP l_hlt
+
+l_c: LOADI D 43 
+EQU C D     
+NOTC 
+CJMP l_e # not +
+
+l_d: LOADI G 0 # +
+LOADI D 1
+STOREB D sign
+JMP l_a
+
+l_e: LOADI D 45
+EQU C D
+NOTC
+CJMP l_f # not -
+LOADI G 0 # -
+LOADI D 0
+STOREB D sign # 1: + 0: -
+JMP l_a
+
+l_f: LOADI D 32
+EQU C D
+NOTC
+CJMP l_g
+JMP l_p
+
+l_g: LOADI D 10
+EQU C D
+NOTC
+CJMP l_s
+
+l_p: LOADI G 0
+LOADI E 0
+LOADW A digit_num # A as counter i
+SUBI A 1
+
+l_a_cmp: LOADI D 0
+LT A D
+CJMP l_h 
+PUSH A
+CALL getNum
+POP B
+LOADI G 0
+LOADW D digit_num
+SUB D D A
+SUBI D 1
+PUSH D
+CALL pow_16
+POP D
+MUL B B D
+ADD E E B
+SUBI A 1
+JMP l_a_cmp
+
+l_h: LOADI G 0
+PUSH E
+CALL print
+STOREW G res
+STOREW G digit_num
+LOADI G 0
+LOADI A 1
+STOREB A sign
+LOADI A 10
+EQU C A
+CJMP l_hlt
+JMP l_a
+
+l_s: LOADI G 0
+LOADW A digit_num
+SUB G A G
+STOREB C num
+ADDI A 1
+LOADI G 0
+STOREW A digit_num
+
+l_a: IN C 0
+LOADI D -1
+EQU C D
+CJMP l_hlt
+l_b: JMP l_c
+l_hlt: HLT
+
+getNum: POP G
+LOADB D num # D as getNum: char c
+LOADI F 48
+LT D F
+CJMP l_upper
+LOADI F 57
+LTE D F
+NOTC
+CJMP l_upper
+SUBI D 48
+PUSH D
+RET
+
+l_upper: LOADI F 65
+LT D F
+CJMP l_lower
+LOADI F 70
+LTE D F
+NOTC
+CJMP l_lower
+SUBI D 55
+PUSH D
+RET
+
+l_lower: LOADI F 97
+LT D F
+CJMP l_ret
+LOADI F 102
+LTE D F
+NOTC
+CJMP l_ret
+SUBI D 87
+PUSH D
+
+l_ret: RET
+
+pow_16: POP F
+	LOADI C 1
+l_cmp:	LOADI A 0
+	EQU F A
+	CJMP l_fi
+	LOADI B 16
+	MUL C C B
+	SUBI F 1
+	JMP l_cmp
+
+l_fi: PUSH C
+      RET
+ 
+print: POP A # ok !!!
+l_sign: LOADI G 0
+LOADB B sign
+LOADI G 0
+EQU B G 
+CJMP l_out_minus # -
+JMP l_number
+
+l_out_minus: LOADI C 45
+OUT C 15
+
+
+l_number: LOADI G 0
+LOADI B 10
+loop1: DIV E A B
+MUL F B E
+SUB F A F
+PUSH F
+ADDI G 1
+SUB A E Z
+LT Z A
+CJMP loop1
+loop2: POP C
+ADDI C 48
+OUT C 15
+SUBI G 1
+LT Z G
+CJMP loop2
+LOADI C 32
+OUT C 15
+RET
