@@ -14,14 +14,14 @@ struct ListNode {
 };
 
 typedef Position List;
-typedef unsigned int index;
+typedef unsigned int hash_index;
 
 struct HashTbl {
     int TableSize;
     List *TheLists;
 };
 
-index Hash(const char* Key, int TableSize) {
+hash_index Hash(const char* Key, int TableSize) {
     unsigned int HashVal = 0;
 
     while (*Key != '\0') {

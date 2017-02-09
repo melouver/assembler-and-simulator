@@ -1,7 +1,7 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <unistd.h>
 
 #define REG0 ((IR >> 24) & 0x07)
@@ -78,26 +78,23 @@ int LTE();
 int NOTC();
 
 int main(int argc, char* argv[]) {
+
     unsigned int instruction;
     unsigned long mem_size;
     int (*ops[])() = {HLT, JMP, CJMP, OJMP, CALL, RET, PUSH, POP, LOADB, LOADW, STOREB, STOREW,
                       LOADI, NOP, IN, OUT, ADD, ADDI, SUB, SUBI, MUL, DIV, AND, OR, NOR, NOTB,
                       SAL, SAR, EQU, LT, LTE, NOTC};
 
-    FILE* code_IR_file, *data_seg_file;
+    FILE* code_IR_file;
     int ret = 1, n;
 
-    if (argc < 3) {
+    if (argc < 2) {
         printf("ERROR: no enough command line arguments!\n");
         exit(-1);
     }
 
 
-    n = sscanf(argv[1], "%li", &mem_size);
-    if (n < 1) {
-        printf("ERROR: argument %s is invalid!\n", argv[1]);
-        exit(-1);
-    }
+    mem_size = 0x1000;
 
     if ((MEM = (unsigned char*)malloc(sizeof(unsigned char) * mem_size)) == NULL) {
         printf("ERROR: failed to allocate memory!\n");
@@ -109,30 +106,41 @@ int main(int argc, char* argv[]) {
     PC = (unsigned int*)MEM;
 
 
-    if ((code_IR_file = fopen(argv[2], "r")) == NULL) {
+    if ((code_IR_file = fopen(argv[1], "r")) == NULL) {
         printf("Failed to open file: %s", argv[2]);
         exit(-1);
     }
     CS = (unsigned char*)MEM;
+    int all_line = 0;
     fscanf(code_IR_file, "%i", &instruction);
     while (!feof(code_IR_file)) {
         memcpy(PC, &instruction, sizeof(instruction));
+        all_line++;
         PC++;
         fscanf(code_IR_file, "%i", &instruction);
     }
-    fclose(code_IR_file);
+    all_line -= ceil(instruction/4) + 1;
 
-
-    DS = (unsigned char*)PC;
+    unsigned char* tmp_ptr = (unsigned char*)PC;
+    tmp_ptr -= (int)(ceil(instruction/4)+1)*4;
+    PC = (unsigned int*)tmp_ptr;
+    DS = tmp_ptr;
     /* write data segment*/
 
-    if ((data_seg_file = fopen(argv[3], "r")) == NULL) {
-        printf("Failed to open file: %s", argv[3]);
-        exit(-1);
+    rewind(code_IR_file);
+    fscanf(code_IR_file, "%i", &instruction);
+    while (all_line > 1) {
+        fscanf(code_IR_file, "%i", &instruction);
+        all_line--;
     }
 
-    fscanf(data_seg_file, "%i", &instruction);
-    while (!feof(data_seg_file)) {
+    /*if ((data_seg_file = fopen(argv[3], "r")) == NULL) {
+        printf("Failed to open file: %s", argv[3]);
+        exit(-1);
+    }*/
+
+    fscanf(code_IR_file, "%i", &instruction);
+    while (!feof(code_IR_file)) {
         unsigned  char *byte_ptr = (unsigned char*)PC;
         unsigned char tmp;
         for (int i = 3; i >= 0; --i) {
@@ -140,10 +148,10 @@ int main(int argc, char* argv[]) {
             memcpy(byte_ptr++, &tmp, sizeof(unsigned char));
         }
         PC++;
-        fscanf(data_seg_file, "%i", &instruction);
+        fscanf(code_IR_file, "%i", &instruction);
     }
 
-    fclose(data_seg_file);
+
 
     /* SS and ES have same capcity*/
     ss_stack_pointer = SS = (unsigned char*)PC;
@@ -159,6 +167,7 @@ int main(int argc, char* argv[]) {
         ret = (*ops[OPCODE])();
     }
     free(MEM);
+    fclose(code_IR_file);
     return 0;
 }
 

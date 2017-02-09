@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "customized_print_functions.h"
-#include "hashtbl.h"
+#include "util/customized_print_functions.h"
+#include "hashtbl/hashtbl.h"
 #define MAX_LEN 1000
 #define INSTRS_COUNT (sizeof(g_instrs_name) / sizeof(g_instrs_name[0]))
 #define INSTR_SYM {"HLT", "JMP", "CJMP", "OJMP", "CALL", "RET",\
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
         line_no++;
         fgets(a_line, MAX_LEN, pfIn);
     }
-    printf("Line Hash builded!\n");
+
 
     rewind(pfIn);
 
@@ -261,21 +261,16 @@ int main(int argc, char *argv[]) {
     fprintf(data_f, "0x%08x\n", offset);
 
     rewind(pfIn);
-    printf("data seg scanned and builded\n");
+
 /*
  * TransToCode
  */
     fgets(a_line, MAX_LEN, pfIn);
-
-
-    char output_code_char[100];
-
-
     while (!feof(pfIn)) {
         if ((pcPos = strchr(a_line, '#')) != NULL) {
             *pcPos = '\0';
         }
-        printf("Now processing instruction : %s.......\n", a_line);
+
         if ((column_ptr = strchr(a_line, ':')) != NULL) {
             n = sscanf(column_ptr+1, "%s", op_sym);
         }else {
@@ -296,14 +291,6 @@ int main(int argc, char *argv[]) {
         if (op_num > 31) {
             printf("ERROR: %s is an invalid instruction!\n", a_line);
             exit(-1);
-        }
-
-        output_code_char[10] = '\0';
-        char program_write_code[100];
-        sprintf(program_write_code, "0x%08lx", TransToCode(column_ptr?column_ptr+1:a_line, op_num));
-        if ((strcmp(program_write_code, output_code_char)) != 0) {
-            printf("ERROR HRER\n");
-
         }
         fprintf(pfOut, "0x%08lx\n", TransToCode(column_ptr?column_ptr+1:a_line, op_num));
         fgets(a_line, MAX_LEN, pfIn);
@@ -453,7 +440,7 @@ unsigned long TransToCode(char* instr_line, int instr_num) {
             instr_code = (op_code << 27) | (arg1 << 24) | (arg2 << 20);
             break;
     }
-    printf("instruction code is %08lx", instr_code);
+
     return instr_code;
 }
 
